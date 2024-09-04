@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Line Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        #sidebar {
+            width: 200px;
+            background: #f4f4f4;
+            padding: 10px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+        }
+        #map {
+            flex-grow: 1;
+            height: 100%;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+        #busSequence {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: white;
+            padding: 10px;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+        .clickable-stop {
+            color: blue;
+            text-decoration: underline;
+            cursor: pointer;
+            border-bottom: 1px dashed blue;
+        }
+        .highlight {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <button id="busLine1">Bus Line 1</button>
+        <button id="busLine2">Bus Line 2</button>
+        <button id="myPosition">My Position</button>
+    </div>
+    <div id="map"></div>
+    <div id="busSequence"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([22.3193, 114.1694], 13); // Centered on Hong Kong
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+
+        const busStopIcon = L.icon({
+            iconUrl: 'https://img.icons8.com/ios-filled/50/000000/bus.png',
+            iconSize: [30, 30],
+            iconAnchor: [15, 30],
+        });
+
+        const busStopHighlightIcon = L.icon({
+            iconUrl: 'https://img.icons8.com/ios-filled/50/ff0000/bus.png', // Highlighted icon
+            iconSize: [30, 30],
+            iconAnchor: [15, 30],
+        });
+
+        const myPositionIcon = L.icon({
+            iconUrl: 'https://img.icons8.com/ios-filled/50/000000/marker.png',
+            iconSize: [30, 30],
+            iconAnchor: [15, 30],
+        });
+
+        const busStops = {
+            "Bus Line 1": [
+                { name: "Central", coords: [22.2833, 114.1581] },
+                { name: "Admiralty", coords: [22.2795, 114.1645] },
+                { name: "Wanchai", coords: [22.2773, 114.1691] },
+                { name: "Causeway Bay", coords: [22.2783, 114.1845] },
+            ],
+            "Bus Line 2": [
+                { name: "Tsim Sha Tsui", coords: [22.2969, 114.1725] },
+                { name: "Jordan", coords: [22.3035, 114.1708] },
+                { name: "Yau Ma Tei", coords: [22.3109, 114.1686] },
+                { name: "Mong Kok", coords: [22.3193, 114.1694] },
+            ]
+        };
+
+        const busLines = {
+            "Bus Line 1": [[22.2833, 114.1581], [22.2795, 114.1645], [22.2773, 114.1691], [22.2783, 114.1845]],
+            "Bus Line 2": [[22.2969, 114.1725], [22.3035, 114.1708], [22.3109, 114.1686], [22.3193, 114.1694]],
+        };
+
+        let currentBusLine = null;
+        let myMarker = null;
+        let myCircle = null;
+        let busStopMarkers = {};
+        let highlightedStops = new Set();
+
+        function toggleBusLine(line) {
+            if (currentBusLine === line) {
+                clearMarkers();
+                currentBusLine = null;
+                document.getElementById('busSequence').innerText = ''; // Clear the sequence display
+            } else {
+                clearMarkers();
+                currentBusLine = line;
+
+                // Move view to the first stop of the bus line
+                const firstStop = busStops[line][0].coords;
+                map.setView(firstStop, 14);
+
+                busLines[line].forEach((coords, index) => {
+                    if (index < busLines[line].length - 1) {
+                        L.polyline([coords, busLines[line][index + 1]], { color: 'blue' }).addTo(map);
+                    }
+                });
+
+                // Create markers for bus stops
+                busStops[line].forEach(stop => {
+                    const marker = L.marker(stop.coords, { icon: busStopIcon }).addTo(map)
+                        .bindPopup(stop.name);
+                    busStopMarkers[stop.name] = marker; // Store marker by name
+                });
+
+                // Update the bus sequence display
+                const stopNames = busStops[line].map(stop => 
+                    `<span class="clickable-stop" onclick="toggleHighlight('${stop.name}')">${stop.name}</span>`
+                ).join(' - ');
+                document.getElementById('busSequence').innerHTML = `${line}: ${stopNames}`;
+            }
+        }
+
+        function toggleHighlight(stopName) {
+            const marker = busStopMarkers[stopName];
+            if (!marker) return;
+
+            if (highlightedStops.has(stopName)) {
+                // Remove highlight
+                marker.setIcon(busStopIcon);
+                highlightedStops.delete(stopName);
+            } else {
+                // Add highlight
+                marker.setIcon(busStopHighlightIcon);
+                highlightedStops.add(stopName);
+            }
+        }
+
+        function clearMarkers() {
+            map.eachLayer(function (layer) {
+                if (layer instanceof L.Marker || layer instanceof L.Polyline) {
+                    map.removeLayer(layer);
+                }
+            });
+            busStopMarkers = {}; // Clear the bus stop markers
+            highlightedStops.clear(); // Clear highlighted stops
+        }
+
+        document.getElementById('busLine1').addEventListener('click', () => toggleBusLine("Bus Line 1"));
+        document.getElementById('busLine2').addEventListener('click', () => toggleBusLine("Bus Line 2"));
+
+        document.getElementById('myPosition').addEventListener('click', () => {
+            if (myMarker) {
+                // Reset to original mode
+                clearMarkers();
+                if (myCircle) {
+                    map.removeLayer(myCircle);
+                    myCircle = null; // Ensure myCircle is set to null
+                }
+                map.removeLayer(myMarker);
+                myMarker = null; // Ensure myMarker is set to null
+                currentBusLine = null; // Reset bus line
+                document.getElementById('busSequence').innerText = ''; // Clear the sequence display
+            } else {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    myMarker = L.marker([lat, lon], { icon: myPositionIcon }).addTo(map)
+                        .bindPopup("You are here").openPopup();
+                    myCircle = L.circle([lat, lon], { radius: 1000 }).addTo(map);
+                    map.setView([lat, lon], 13);
+                    filterBusStops(lat, lon);
+                }, () => {
+                    alert("Unable to retrieve your location.");
+                });
+            }
+        });
+
+        function filterBusStops(lat, lon) {
+            Object.values(busStops).flat().forEach(stop => {
+                const distance = map.distance([lat, lon], stop.coords);
+                if (distance <= 1000) {
+                    const marker = L.marker(stop.coords, { icon: busStopIcon }).addTo(map)
+                        .bindPopup(stop.name);
+                    busStopMarkers[stop.name] = marker; // Store the created marker
+                }
+            });
+        }
+    </script>
+</body>
+</html>
