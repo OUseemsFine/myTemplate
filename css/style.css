@@ -1729,6 +1729,7 @@ textarea.form-control {
     color: #666666; }
 
 .form-check-label {
+  color: grey;
   margin-bottom: 0; }
 
 .form-check-inline {
