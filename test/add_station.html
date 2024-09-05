@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Station</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            max-width: 500px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Add Station</h2>
+<form id="station-form">
+    <input type="text" id="sName" placeholder="Station Name" required>
+    <input type="text" id="latitude" placeholder="Latitude" required>
+    <input type="text" id="longitude" placeholder="Longitude" required>
+    <button type="submit">Add Station</button>
+</form>
+
+<script>
+    // Function to get CSRF token
+    async function getCsrfToken() {
+        const response = await fetch('http://127.0.0.1:8000/catalog/api/get-csrf-token/');
+        const data = await response.json();
+        return data.csrfToken; // Adjust according to the response structure
+    }
+
+    // Handle form submission
+    document.getElementById('station-form').addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const csrfToken = await getCsrfToken();
+        const sName = document.getElementById('sName').value;
+        const latitude = document.getElementById('latitude').value;
+        const longitude = document.getElementById('longitude').value;
+
+        const response = await fetch('http://127.0.0.1:8000/catalog/api/stations/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ sName, latitude, longitude })
+        });
+
+        if (response.ok) {
+            alert('Station added successfully!');
+            document.getElementById('station-form').reset();
+        } else {
+            const errorData = await response.json();
+            alert('Error: ' + (errorData.detail || 'Failed to add station.'));
+        }
+    });
+</script>
+
+</body>
+</html>

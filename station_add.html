@@ -203,9 +203,9 @@
                     <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i
                                 class="icon icon-plug"></i><span class="nav-text">站点</span></a>
                         <ul aria-expanded="false">
-                            <li><a href="./uc-select2.html">查看站点</a></li>
+                            <li><a href="./uc-select2.html">站点数据</a></li>
                             <li><a href="./station_add.html">添加站点</a></li>
-                            <li><a href="./uc-noui-slider.html">管理站点</a></li>
+                            <li><a href="./station_manage.html">管理站点</a></li>
                         </ul>
                     </li>
 
@@ -213,8 +213,8 @@
                         class="icon icon-user"></i><span class="nav-text">车辆</span></a>
                 <ul aria-expanded="false">
                     <li><a href="./uc-select2.html">查看车辆</a></li>
-                    <li><a href="./uc-nestable.html">添加车辆</a></li>
-                    <li><a href="./form-element.html">管理车辆</a></li>
+                    <li><a href="./station_add.html">添加车辆</a></li>
+                    <li><a href="./station_manage.html">管理车辆</a></li>
                 </ul>
                     </li>
 
@@ -279,50 +279,26 @@
                             </div>
                             <div class="card-body">
                                 <div class="basic-form">
-                                    <form>
+                                    <form id="station-form">
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">站点名</label>
                                             <div class="col-sm-10">
-                                                <input type="email" class="form-control" placeholder="请输入站点名">
+                                                <input id="sName" type="text" class="form-control" placeholder="请输入站点名" required>
                                             </div>
                                         </div>
 
                                     <div class="form-row">
                                         <div class="form-group col-md-6">
-                                            <label>经度</label>
-                                            <input type="password" class="form-control" placeholder="填写经度信息">
+                                            <label>纬度</label>
+                                            <input  id="latitude" type="text" class="form-control" placeholder="填写纬度信息" required>
                                         </div>
                                         <div class="form-group col-md-6">
-                                            <label>纬度</label>
-                                            <input type="text" class="form-control" placeholder="填写纬度信息">
+                                            <label>经度</label>
+                                            <input  id="longitude" type="text" class="form-control" placeholder="填写经度信息" required>
                                         </div>
                                     </div>
                                         
-                                        <fieldset class="form-group">
-                                            <div class="row">
-                                                <label class="col-form-label col-sm-2 pt-0">状态</label>
-                                                <div class="col-sm-10">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="gridRadios" value="option1" checked>
-                                                        <label class="form-check-label">
-                                                            运营中
-                                                        </label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="gridRadios" value="option2">
-                                                        <label class="form-check-label" >
-                                                            维护中
-                                                        </label>
-                                                    </div>
-                                                    <div class="form-check disabled">
-                                                        <input class="form-check-input" type="radio" name="gridRadios" value="option3" >
-                                                        <label class="form-check-label">
-                                                            建设中
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </fieldset>
+
                                         <div class="form-group row">
                                             <div class="col-sm-10">
                                                 <button type="submit" class="btn btn-primary">添加</button>
@@ -337,7 +313,7 @@
                         <div class="col-lg-6 col-sm-6">
                             <div class="card">
                                 <div class="card-header">
-                                    <h4 class="card-title">地图</h4>
+                                    <h4 class="card-title">点击地图位置获取经纬度</h4>
                                 </div>
                                 <div class="card-body" style="padding: 0; height: 400px;">
                                     <div id="map" style="height: 100%;"></div>
@@ -378,7 +354,7 @@
                             map.on('click', function(e) {
                                 var lat = e.latlng.lat.toFixed(5);
                                 var lng = e.latlng.lng.toFixed(5);
-                                document.getElementById('coordinates').innerHTML = `经度: ${lng}, 纬度: ${lat}`;
+                                document.getElementById('coordinates').innerHTML = `纬度: ${lat},经度: ${lng},`;
                         
                                 // 反向地理编码获取地点信息
                                 fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
@@ -454,6 +430,52 @@
      <!--**********************************
         Scripts
     ***********************************-->
+
+    <!--********************
+        API script start
+    *************************-->
+
+    <script>
+        // Function to get CSRF token
+        async function getCsrfToken() {
+            const response = await fetch('http://127.0.0.1:8000/catalog/api/get-csrf-token/');
+            const data = await response.json();
+            return data.csrfToken; // Adjust according to the response structure
+        }
+    
+        // Handle form submission
+        document.getElementById('station-form').addEventListener('submit', async function (event) {
+            event.preventDefault();
+    
+            const csrfToken = await getCsrfToken();
+            const sName = document.getElementById('sName').value;
+            const latitude = document.getElementById('latitude').value;
+            const longitude = document.getElementById('longitude').value;
+    
+            const response = await fetch('http://127.0.0.1:8000/catalog/api/stations/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ sName, latitude, longitude })
+            });
+    
+            if (response.ok) {
+                alert('Station added successfully!');
+                document.getElementById('station-form').reset();
+            } else {
+                const errorData = await response.json();
+                alert('Error: ' + (errorData.detail || 'Failed to add station.'));
+            }
+        });
+    </script>
+
+    <!--********************
+        API script end
+    *************************-->
+
+
     <!-- Required vendors -->
     <script src="./vendor/global/global.min.js"></script>
     <script src="./js/quixnav-init.js"></script>

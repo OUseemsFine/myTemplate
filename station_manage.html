@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en-US">
 
@@ -13,6 +12,19 @@
     <link rel="stylesheet" href="./vendor/owl-carousel/css/owl.theme.default.min.css">
     <link href="./vendor/jqvmap/css/jqvmap.min.css" rel="stylesheet">
     <link href="./css/style.css" rel="stylesheet">    
+
+    <!--style of this page-->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 300px; /* 地图高度 */
+            width: 100%; /* 地图宽度 */
+            margin-top: 20px; /* 与表单的间距 */
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </head>
 
 <body>
@@ -247,7 +259,121 @@
         </div>
         <!--**********************************
             Sidebar end
-        ***********************************-->        
+        ***********************************-->    
+        <!--**********************************
+            Content body start
+        ***********************************-->
+        <div class="content-body">
+            <div class="container-fluid">
+                <div class="row page-titles mx-0">
+                    <div class="col-sm-6 p-md-0">
+                        <div class="welcome-text">
+                            <h4>站点信息表</h4>
+                            <p class="mb-0">点击按钮以修改站点信息</p>
+                        </div>
+                        <div class="sidebar">
+                            <button id="fetch-stations" class="btn btn-primary">加载信息</button>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="javascript:void(0)">站点</a></li>
+                            <li class="breadcrumb-item active"><a href="javascript:void(0)">管理站点</a></li>
+                        </ol>
+                    </div>
+                </div>
+                <!-- row -->
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">站点信息</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-responsive-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>#站点编号</th>
+                                                <th>站点名</th>
+                                                <th>站点状态</th>
+                                                <th>位置</th>
+                                                <th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="station-table">
+                                            <tr>
+                                                <th>1</th>
+                                                <td>example</td>
+                                                <td><span class="badge badge-primary">--</span>
+                                                </td>
+                                                <td>---</td>
+                                                <td class="color-primary">---</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                    <div class="col-lg-6 col-sm-6">
+                        <div class="card">
+                          <!--table section start-->
+                            <div id="station-form" class="card-body" style="display: block; ">
+                               <div class="card-body">
+                                <h4 class="card-title">修改站点信息</h4>
+                                <form id="form">
+                                    <div class="form-group">
+                                        <label for="stationName">站点名</label>
+                                        <input readonly required style="background-color: #f0f0f0;" type="text" class="form-control" id="stationName" placeholder="请选择一个站点" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="stationStatus">状态</label>
+                                        <select class="form-control" id="stationStatus">
+                                            <option value="m">维护中</option>
+                                            <option value="o">运营中</option>
+                                            <option value="b">建设中</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="stationLatitude">纬度</label>
+                                        <input type="number" class="form-control" id="stationLatitude" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="stationLongitude">经度</label>
+                                        <input type="number" class="form-control" id="stationLongitude" required>
+                                    </div>
+                                    <button type="button" class="btn btn-success" id="updateButton">更新</button>
+                                    <button type="button" class="btn btn-danger" id="deleteButton">删除</button>
+                                </form>
+                               </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 col-sm-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">站点地图</h4>
+                            </div>
+                            <div class="card-body" style="padding: 0; height: 400px;">
+                                <div id="map" style="height: 100%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    </div>
+                          
+                    
+                </div>
+            </div>
+        </div>
+        <!--**********************************
+            Content body end
+        ***********************************-->    
 
 
 
@@ -260,6 +386,132 @@
      <!--**********************************
         Scripts
     ***********************************-->
+
+    <!--**********************************
+        fetch stations Scripts start
+    ***********************************-->
+    <script>
+        let selectedStation = null; // 存储选中的站点信息
+        let map, marker;
+    
+        // 获取CSRF令牌
+        async function getCsrfToken() {
+            const response = await fetch('http://127.0.0.1:8000/catalog/api/get-csrf-token/');
+            const data = await response.json();
+            return data.csrfToken; // 根据响应结构调整
+        }
+    
+        // 状态映射
+        const statusMapping = {
+            'm': '维护中',
+            'o': '运营中',
+            'b': '建设中'
+        };
+
+        //to set each status diffrent color
+        const statusClassMapping = {
+        'm': 'badge badge-danger',
+        'o': 'badge badge-success',
+        'b': 'badge badge-primary'
+    };
+    
+        // 获取所有站点信息
+        async function fetchStations() {
+            const csrfToken = await getCsrfToken(); // 获取CSRF令牌
+            const response = await fetch('http://127.0.0.1:8000/catalog/api/stations/list', {
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            });
+    
+            if (response.ok) {
+                const stations = await response.json();
+                displayStations(stations);
+                Swal.fire({ icon: 'success', title: '成功!', text: '站点信息已成功加载。' });
+            } else {
+                const errorData = await response.json();
+                Swal.fire({ icon: 'error', title: '错误!', text: errorData.detail || '获取站点信息失败。' });
+            }
+        }
+    
+        // 显示站点信息
+        function displayStations(stations) {
+            const tableBody = document.getElementById('station-table');
+            tableBody.innerHTML = ''; // 清空之前的内容
+    
+            stations.forEach(station => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${station.id}</td>
+                    <td>${station.sName}</td>
+                    <td><span class="${statusClassMapping[station.status] || ''}">${statusMapping[station.status] || '未知状态'}</span></td>
+                    <td>${station.latitude}, ${station.longitude}</td>
+                    <td>
+                        <button class="btn btn-info" onclick="manageStation(${station.id}, '${station.sName}', '${station.status}', ${station.latitude}, ${station.longitude})">选择</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+    
+        // 管理按钮点击事件
+        function manageStation(id, name, status, latitude, longitude) {
+            selectedStation = { id, name, status, latitude, longitude }; // 保存选中的站点信息
+            document.getElementById('stationName').value = name;
+            document.getElementById('stationStatus').value = status;
+            document.getElementById('stationLatitude').value = latitude;
+            document.getElementById('stationLongitude').value = longitude;
+            document.getElementById('station-form').style.display = 'block'; // 显示表单
+            initMap(longitude, latitude); // 初始化地图
+        }
+    
+        // 初始化地图
+        function initMap(longitude, latitude) {
+            if (map) {
+                map.remove(); // 清除现有地图实例
+            }
+            map = L.map('map').setView([latitude, longitude], 15); // 设置地图中心和缩放级别
+    
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+    
+            marker = L.marker([latitude, longitude]).addTo(map); // 添加标记
+        }
+    
+        // 更新按钮点击事件
+        document.getElementById('updateButton').addEventListener('click', async () => {
+            if (selectedStation) {
+                // 这里可以添加更新逻辑 (API 调用)
+                const updatedData = {
+                    id: selectedStation.id,
+                    sName: document.getElementById('stationName').value,
+                    status: document.getElementById('stationStatus').value,
+                    latitude: parseFloat(document.getElementById('stationLatitude').value),
+                    longitude: parseFloat(document.getElementById('stationLongitude').value)
+                };
+                console.log("更新站点信息:", updatedData);
+                Swal.fire({ icon: 'success', title: '成功!', text: '站点信息已更新。' });
+            }
+        });
+    
+        // 删除按钮点击事件
+        document.getElementById('deleteButton').addEventListener('click', async () => {
+            if (selectedStation) {
+                // 这里可以添加删除逻辑 (API 调用)
+                console.log("删除站点:", selectedStation.id);
+                Swal.fire({ icon: 'success', title: '成功!', text: '站点信息已删除。' });
+            }
+        });
+    
+        // 绑定按钮
+        document.getElementById('fetch-stations').addEventListener('click', fetchStations);
+    </script>
+    <!--**********************************
+        fetch stations Scripts end
+    ***********************************-->
+
     <!-- Required vendors -->
     <script src="./vendor/global/global.min.js"></script>
     <script src="./js/quixnav-init.js"></script>

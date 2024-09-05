@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>站点管理</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        body {
+            display: flex;
+        }
+        .sidebar {
+            width: 200px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            position: fixed;
+            right: 0; /* 侧边栏固定在右边 */
+            top: 0;
+            height: 100%; /* 侧边栏高度 */
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+            margin-right: 220px; /* 留出侧边栏的空间 */
+        }
+        #map {
+            height: 300px; /* 地图高度 */
+            width: 100%; /* 地图宽度 */
+            margin-top: 20px; /* 与表单的间距 */
+        }
+        .status-m { color: orange; } /* 维护中 */
+        .status-o { color: green; } /* 运营中 */
+        .status-b { color: blue; } /* 建设中 */
+    </style>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+<body>
+
+<div class="sidebar">
+    <h4>管理</h4>
+    <button id="fetch-stations" class="btn btn-primary">获取信息</button>
+</div>
+
+<div class="content">
+    <h2>站点信息</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>站点ID</th>
+                <th>站点名</th>
+                <th>状态</th>
+                <th>位置 (纬度, 经度)</th>
+                <th>管理</th>
+            </tr>
+        </thead>
+        <tbody id="station-table-body">
+            <!-- 站点信息将插入到这里 -->
+        </tbody>
+    </table>
+
+    <!-- 表单区域 -->
+    <div id="station-form" class="card" style="display: none; margin-top: 20px;">
+        <div class="card-body">
+            <h4 class="card-title">修改站点信息</h4>
+            <form id="form">
+                <div class="form-group">
+                    <label for="stationName">站点名</label>
+                    <input type="text" class="form-control" id="stationName" required>
+                </div>
+                <div class="form-group">
+                    <label for="stationStatus">状态</label>
+                    <select class="form-control" id="stationStatus">
+                        <option value="m">维护中</option>
+                        <option value="o">运营中</option>
+                        <option value="b">建设中</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="stationLatitude">纬度</label>
+                    <input type="number" class="form-control" id="stationLatitude" required>
+                </div>
+                <div class="form-group">
+                    <label for="stationLongitude">经度</label>
+                    <input type="number" class="form-control" id="stationLongitude" required>
+                </div>
+                <button type="button" class="btn btn-success" id="updateButton">更新</button>
+                <button type="button" class="btn btn-danger" id="deleteButton">删除</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 地图区域 -->
+    <div id="map"></div>
+</div>
+
+<script>
+    let selectedStation = null; // 存储选中的站点信息
+    let map, marker;
+
+    // 获取CSRF令牌
+    async function getCsrfToken() {
+        const response = await fetch('http://127.0.0.1:8000/catalog/api/get-csrf-token/');
+        const data = await response.json();
+        return data.csrfToken; // 根据响应结构调整
+    }
+
+    // 状态映射
+    const statusMapping = {
+        'm': '维护中',
+        'o': '运营中',
+        'b': '建设中'
+    };
+
+    const statusClassMapping = {
+        'm': 'status-m',
+        'o': 'status-o',
+        'b': 'status-b'
+    };
+
+    // 获取所有站点信息
+    async function fetchStations() {
+        const csrfToken = await getCsrfToken(); // 获取CSRF令牌
+        const response = await fetch('http://127.0.0.1:8000/catalog/api/stations/list', {
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        });
+
+        if (response.ok) {
+            const stations = await response.json();
+            displayStations(stations);
+            Swal.fire({ icon: 'success', title: '成功!', text: '站点信息已成功加载。' });
+        } else {
+            const errorData = await response.json();
+            Swal.fire({ icon: 'error', title: '错误!', text: errorData.detail || '获取站点信息失败。' });
+        }
+    }
+
+    // 显示站点信息
+    function displayStations(stations) {
+        const tableBody = document.getElementById('station-table-body');
+        tableBody.innerHTML = ''; // 清空之前的内容
+
+        stations.forEach(station => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${station.id}</td>
+                <td>${station.sName}</td>
+                <td class="${statusClassMapping[station.status] || ''}">${statusMapping[station.status] || '未知状态'}</td>
+                <td>${station.latitude}, ${station.longitude}</td>
+                <td>
+                    <button class="btn btn-info" onclick="manageStation(${station.id}, '${station.sName}', '${station.status}', ${station.latitude}, ${station.longitude})">管理</button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    // 管理按钮点击事件
+    function manageStation(id, name, status, latitude, longitude) {
+        selectedStation = { id, name, status, latitude, longitude }; // 保存选中的站点信息
+        document.getElementById('stationName').value = name;
+        document.getElementById('stationStatus').value = status;
+        document.getElementById('stationLatitude').value = latitude;
+        document.getElementById('stationLongitude').value = longitude;
+        document.getElementById('station-form').style.display = 'block'; // 显示表单
+        initMap(longitude, latitude); // 初始化地图
+    }
+
+    // 初始化地图
+    function initMap(longitude, latitude) {
+        if (map) {
+            map.remove(); // 清除现有地图实例
+        }
+        map = L.map('map').setView([latitude, longitude], 15); // 设置地图中心和缩放级别
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        marker = L.marker([latitude, longitude]).addTo(map); // 添加标记
+    }
+
+    // 更新按钮点击事件
+    document.getElementById('updateButton').addEventListener('click', async () => {
+        if (selectedStation) {
+            // 这里可以添加更新逻辑 (API 调用)
+            const updatedData = {
+                id: selectedStation.id,
+                sName: document.getElementById('stationName').value,
+                status: document.getElementById('stationStatus').value,
+                latitude: parseFloat(document.getElementById('stationLatitude').value),
+                longitude: parseFloat(document.getElementById('stationLongitude').value)
+            };
+            console.log("更新站点信息:", updatedData);
+            Swal.fire({ icon: 'success', title: '成功!', text: '站点信息已更新。' });
+        }
+    });
+
+    // 删除按钮点击事件
+    document.getElementById('deleteButton').addEventListener('click', async () => {
+        if (selectedStation) {
+            // 这里可以添加删除逻辑 (API 调用)
+            console.log("删除站点:", selectedStation.id);
+            Swal.fire({ icon: 'success', title: '成功!', text: '站点信息已删除。' });
+        }
+    });
+
+    // 绑定按钮
+    document.getElementById('fetch-stations').addEventListener('click', fetchStations);
+</script>
+
+</body>
+</html>
