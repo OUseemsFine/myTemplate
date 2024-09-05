@@ -443,15 +443,38 @@
             return data.csrfToken; // Adjust according to the response structure
         }
     
+        // Function to check if station name exists
+        async function checkStationNameExists(sName) {
+            const response = await fetch(`http://127.0.0.1:8000/catalog/api/stations/check-name?sName=${encodeURIComponent(sName)}`);
+            const data = await response.json();
+            return data.exists; // Assuming the response contains { exists: true/false }
+        }
+    
         // Handle form submission
         document.getElementById('station-form').addEventListener('submit', async function (event) {
             event.preventDefault();
     
-            const csrfToken = await getCsrfToken();
             const sName = document.getElementById('sName').value;
-            const latitude = document.getElementById('latitude').value;
-            const longitude = document.getElementById('longitude').value;
+            const latitude = parseFloat(document.getElementById('latitude').value);
+            const longitude = parseFloat(document.getElementById('longitude').value);
     
+            // Validate latitude and longitude
+            if (isNaN(latitude) || isNaN(longitude)) {
+                alert('纬度和经度必须是有效的数字。');
+                return; // 退出提交
+            }
+    
+            // Check if station name exists
+            const nameExists = await checkStationNameExists(sName);
+            if (nameExists) {
+                alert('该车站名已存在，请重新输入。');
+                document.getElementById('sName').style.borderColor = 'red'; // 标红输入框
+                return; // 退出提交
+            } else {
+                document.getElementById('sName').style.borderColor = ''; // 清除标红
+            }
+    
+            const csrfToken = await getCsrfToken();
             const response = await fetch('http://127.0.0.1:8000/catalog/api/stations/add', {
                 method: 'POST',
                 headers: {
@@ -462,11 +485,11 @@
             });
     
             if (response.ok) {
-                alert('Station added successfully!');
+                alert('车站添加成功！');
                 document.getElementById('station-form').reset();
             } else {
                 const errorData = await response.json();
-                alert('Error: ' + (errorData.detail || 'Failed to add station.'));
+                alert('错误: ' + (errorData.detail || '添加车站失败。'));
             }
         });
     </script>

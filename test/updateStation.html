@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>更新站点信息</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            max-width: 500px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<h2>更新站点信息</h2>
+<form id="updateForm">
+    <label for="sName">站点名称：</label>
+    <input type="text" id="sName" name="sName" required>
+
+    <label for="status">状态：</label>
+    <input type="text" id="status" name="status" required placeholder="维护中、运营中、建设中">
+
+    <label for="latitude">纬度：</label>
+    <input type="text" id="latitude" name="latitude" required>
+
+    <label for="longitude">经度：</label>
+    <input type="text" id="longitude" name="longitude" required>
+
+    <button type="submit">更新站点</button>
+</form>
+
+<script>
+    async function getCsrfToken() {
+        const response = await fetch('http://127.0.0.1:8000/catalog/api/get-csrf-token/');
+        const data = await response.json();
+        return data.csrf_token; // 假设返回中包含 csrf_token
+    }
+
+    document.getElementById('updateForm').addEventListener('submit', async function(event) {
+        event.preventDefault(); // 阻止默认表单提交
+
+        const sName = document.getElementById('sName').value;
+        const status = document.getElementById('status').value;
+        const latitude = document.getElementById('latitude').value;
+        const longitude = document.getElementById('longitude').value;
+
+        const csrfToken = await getCsrfToken();
+
+        const response = await fetch('http://127.0.0.1:8000/catalog/api/stations/update', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken // 添加 CSRF 令牌
+            },
+            body: JSON.stringify({
+                sName: sName,
+                status: status,
+                latitude: latitude,
+                longitude: longitude
+            })
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            alert('站点信息更新成功: ' + JSON.stringify(result));
+        } else {
+            const error = await response.json();
+            alert('更新失败: ' + JSON.stringify(error));
+        }
+    });
+</script>
+
+</body>
+</html>

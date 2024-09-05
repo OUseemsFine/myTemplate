@@ -324,7 +324,7 @@
                             <div id="station-form" class="card-body" style="display: block; ">
                                <div class="card-body">
                                 <h4 class="card-title">修改站点信息</h4>
-                                <form id="form">
+                                <form id="updateForm">
                                     <div class="form-group">
                                         <label for="stationName">站点名</label>
                                         <input readonly required style="background-color: #f0f0f0;" type="text" class="form-control" id="stationName" placeholder="请选择一个站点" required>
@@ -374,7 +374,7 @@
         <!--**********************************
             Content body end
         ***********************************-->    
-
+       
 
 
     
@@ -480,21 +480,21 @@
             marker = L.marker([latitude, longitude]).addTo(map); // 添加标记
         }
     
-        // 更新按钮点击事件
-        document.getElementById('updateButton').addEventListener('click', async () => {
-            if (selectedStation) {
-                // 这里可以添加更新逻辑 (API 调用)
-                const updatedData = {
-                    id: selectedStation.id,
-                    sName: document.getElementById('stationName').value,
-                    status: document.getElementById('stationStatus').value,
-                    latitude: parseFloat(document.getElementById('stationLatitude').value),
-                    longitude: parseFloat(document.getElementById('stationLongitude').value)
-                };
-                console.log("更新站点信息:", updatedData);
-                Swal.fire({ icon: 'success', title: '成功!', text: '站点信息已更新。' });
-            }
-        });
+        // // 更新按钮点击事件
+        // document.getElementById('updateButton').addEventListener('click', async () => {
+        //     if (selectedStation) {
+        //         // 这里可以添加更新逻辑 (API 调用)
+        //         const updatedData = {
+        //             id: selectedStation.id,
+        //             sName: document.getElementById('stationName').value,
+        //             status: document.getElementById('stationStatus').value,
+        //             latitude: parseFloat(document.getElementById('stationLatitude').value),
+        //             longitude: parseFloat(document.getElementById('stationLongitude').value)
+        //         };
+        //         console.log("更新站点信息:", updatedData);
+        //         Swal.fire({ icon: 'success', title: '成功!', text: '站点信息已更新。' });
+        //     }
+        // });
     
         // 删除按钮点击事件
         document.getElementById('deleteButton').addEventListener('click', async () => {
@@ -507,10 +507,52 @@
     
         // 绑定按钮
         document.getElementById('fetch-stations').addEventListener('click', fetchStations);
+    
+    //<!--**********************************
+        //fetch stations Scripts end
+    //***********************************-->
+
+    //<!--**********************************
+        //update station Scripts start
+    //***********************************-->
+    
+        document.getElementById('updateButton').addEventListener('click', async function(event) {
+            event.preventDefault(); // 阻止默认表单提交
+    
+            const sName = document.getElementById('stationName').value;
+            const status = document.getElementById('stationStatus').value;
+            const latitude = document.getElementById('stationLatitude').value;
+            const longitude = document.getElementById('stationLongitude').value;
+    
+            const csrfToken = await getCsrfToken();
+    
+            const response = await fetch('http://127.0.0.1:8000/catalog/api/stations/update', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken // 添加 CSRF 令牌
+                },
+                body: JSON.stringify({
+                    sName: sName,
+                    status: status,
+                    latitude: latitude,
+                    longitude: longitude
+                })
+            });
+    
+            if (response.ok) {
+                const result = await response.json();
+                alert('站点信息更新成功: ' + JSON.stringify(result));
+                fetchStations();
+            } else {
+                const error = await response.json();
+                alert('更新失败: ' + JSON.stringify(error));
+            }
+        });
+    //<!--**********************************
+        //update station Scripts end
+    //***********************************-->
     </script>
-    <!--**********************************
-        fetch stations Scripts end
-    ***********************************-->
 
     <!-- Required vendors -->
     <script src="./vendor/global/global.min.js"></script>
