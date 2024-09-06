@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公交线路选择</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .stop {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 5px;
+            background-color: #007BFF;
+            color: white;
+            cursor: move;
+            border-radius: 5px;
+        }
+        .selected {
+            background-color: #28a745;
+        }
+        .line-summary {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .card {
+            margin: 20px;
+            width: 400px; /* 固定宽度 */
+            height: 400px; /* 固定高度 */
+        }
+        .hidden {
+            display: none;
+        }
+        .form-group {
+            margin-bottom: 20px; /* 增加间距 */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container d-flex justify-content-center">
+    <div class="card">
+        <div class="card-header">
+            <h1>输入线路名称</h1>
+        </div>
+        <div class="card-body" id="step1">
+            <form id="lineForm">
+                <div class="form-group">
+                    <label for="lineName">线路名称:</label>
+                    <input type="text" class="form-control" id="lineName" required>
+                </div>
+                <button type="button" class="btn btn-success" onclick="nextStep()">下一步</button>
+            </form>
+        </div>
+
+        <div class="card-body hidden" id="step2">
+            <h2>选择公交站</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>公交站</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="stopTable">
+                    <tr>
+                        <td>站点1</td>
+                        <td><button class="btn btn-primary" onclick="toggleStop(this, '站点1', 'stop1')">选择</button></td>
+                    </tr>
+                    <tr>
+                        <td>站点2</td>
+                        <td><button class="btn btn-primary" onclick="toggleStop(this, '站点2', 'stop2')">选择</button></td>
+                    </tr>
+                    <tr>
+                        <td>站点3</td>
+                        <td><button class="btn btn-primary" onclick="toggleStop(this, '站点3', 'stop3')">选择</button></td>
+                    </tr>
+                    <tr>
+                        <td>站点4</td>
+                        <td><button class="btn btn-primary" onclick="toggleStop(this, '站点4', 'stop4')">选择</button></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="selected-stops">
+                <h2>选择的线路</h2>
+                <div id="selectedStops" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                <div class="buttons mt-3">
+                    <button class="btn btn-secondary" onclick="prevStep()">上一步</button>
+                    <button class="btn btn-success" onclick="saveLine()">保存线路</button>
+                </div>
+            </div>
+
+            <div class="line-summary" id="lineSummary"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentStep = 1;
+
+    function nextStep() {
+        const lineName = document.getElementById('lineName').value;
+        if (!lineName) {
+            alert('请输入线路名称！');
+            return;
+        }
+        
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.remove('hidden');
+        currentStep++;
+    }
+
+    function prevStep() {
+        if (currentStep === 2) {
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step1').classList.remove('hidden');
+            currentStep--;
+        }
+    }
+
+    function toggleStop(button, stopName, stopId) {
+        const selectedStops = document.getElementById('selectedStops');
+        const row = button.closest('tr');
+
+        if (button.innerText === '选择') {
+            button.innerText = '取消选择';
+            row.classList.add('selected');
+            addStop(stopName, stopId);
+        } else {
+            button.innerText = '选择';
+            row.classList.remove('selected');
+            removeStop(stopId);
+        }
+    }
+
+    function addStop(stopName, stopId) {
+        const selectedStops = document.getElementById('selectedStops');
+        const stopDiv = document.createElement('div');
+        stopDiv.innerText = stopName;
+        stopDiv.className = 'stop';
+        stopDiv.id = stopId;
+        stopDiv.draggable = true;
+        stopDiv.ondragstart = drag;
+        selectedStops.appendChild(stopDiv);
+    }
+
+    function removeStop(stopId) {
+        const selectedStops = document.getElementById('selectedStops');
+        const stopDiv = document.getElementById(stopId);
+        if (stopDiv) {
+            selectedStops.removeChild(stopDiv);
+        }
+    }
+
+    function allowDrop(event) {
+        event.preventDefault();
+    }
+
+    function drag(event) {
+        event.dataTransfer.setData("text", event.target.id);
+    }
+
+    function drop(event) {
+        event.preventDefault();
+        const draggedId = event.dataTransfer.getData("text");
+        const draggedElement = document.getElementById(draggedId);
+        const dropZone = event.target;
+
+        if (dropZone.className === 'stop') {
+            const dropParent = dropZone.parentNode;
+            dropParent.insertBefore(draggedElement, dropZone);
+        } else {
+            dropZone.appendChild(draggedElement);
+        }
+    }
+
+    function saveLine() {
+        const selectedStops = document.getElementById('selectedStops');
+        const stops = Array.from(selectedStops.getElementsByClassName('stop'));
+        const stopNames = stops.map(stop => stop.innerText);
+        
+        const lineSummary = document.getElementById('lineSummary');
+        lineSummary.innerText = '当前线路顺序: ' + stopNames.join(' - ');
+
+        // 清空选择的线路以便添加新线路
+        selectedStops.innerHTML = '';
+        const buttons = document.querySelectorAll('#stopTable button');
+        buttons.forEach(button => {
+            button.innerText = '选择';
+        });
+        const rows = document.querySelectorAll('#stopTable tr');
+        rows.forEach(row => {
+            row.classList.remove('selected');
+        });
+        
+        // 返回步骤1
+        prevStep();
+    }
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>

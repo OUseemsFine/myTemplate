@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>局部固定卡片大小</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* 仅对当前的 .card 设置固定大小 */
+        .card {
+            margin: 20px;
+            width: 400px; /* 固定宽度 */
+            height: 300px; /* 固定高度 */
+            overflow: hidden; /* 超出内容隐藏 */
+        }
+
+        /* 可以为其他卡片设置不同样式 */
+        .other-card {
+            margin: 20px;
+            width: auto; /* 自适应宽度 */
+            height: auto; /* 自适应高度 */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container d-flex justify-content-center">
+    <div class="card">
+        <div class="card-header">
+            <h1>固定大小的卡片</h1>
+        </div>
+        <div class="card-body">
+            <p>这是一个固定大小的卡片示例。</p>
+            <p>你可以在这里放置任何内容。</p>
+        </div>
+    </div>
+
+    <div class="other-card">
+        <div class="card-header">
+            <h1>自适应大小的卡片</h1>
+        </div>
+        <div class="card-body">
+            <p>这是一个自适应大小的卡片示例。</p>
+            <p>内容可以根据需要调整。</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>
