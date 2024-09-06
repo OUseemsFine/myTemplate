@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公交站地图</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        #map {
+            height: 100vh;
+        }
+        .highlight {
+            font-size: 32px;
+            color: black; /* 已标亮颜色 */
+        }
+        .bus-icon {
+            font-size: 32px;
+            color: green; /* 未标亮颜色 */
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([39.9042, 116.4074], 12);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+
+        const busStops = [
+            { name: "公交站1", lat: 39.9042, lon: 116.4074 },
+            { name: "公交站2", lat: 39.9142, lon: 116.4174 },
+            { name: "公交站3", lat: 39.9242, lon: 116.4274 },
+        ];
+
+        const busIcon = L.divIcon({
+            className: 'bus-icon',
+            html: '<i class="fas fa-bus"></i>',
+            iconSize: [32, 32],
+        });
+
+        const highlightedBusIcon = L.divIcon({
+            className: 'highlight',
+            html: '<i class="fas fa-bus"></i>',
+            iconSize: [32, 32],
+        });
+
+        busStops.forEach(stop => {
+            const marker = L.marker([stop.lat, stop.lon], { icon: busIcon })
+                .addTo(map)
+                .bindPopup(stop.name);
+
+            marker.on('click', function() {
+                map.eachLayer(function(layer) {
+                    if (layer instanceof L.Marker) {
+                        layer.setIcon(busIcon); // 设置为已标亮图标
+                    }
+                });
+                this.setIcon(highlightedBusIcon); // 设置为未标亮图标
+            });
+        });
+    </script>
+</body>
+</html>
