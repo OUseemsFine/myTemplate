@@ -227,7 +227,7 @@
                                 class="icon icon-world-2"></i><span class="nav-text">线路</span></a>
                         <ul aria-expanded="false">
                             <li><a href="./ui-accordion.html">查看线路</a></li>
-                            <li><a href="./ui-alert.html">添加线路</a></li>
+                            <li><a href="./line_add.html">添加线路</a></li>
                             <li><a href="./ui-alert.html">修改线路</a></li>
                         </ul>
                     </li>
@@ -467,6 +467,7 @@ async function fetchStations() {
         Swal.fire({ icon: 'error', title: '错误!', text: errorData.detail || '获取站点信息失败。' });
     }
 }
+window.onload(fetchStations());
 
 // 加载所有站点并在地图上显示标记
 function loadStationsOnMap(stations) {

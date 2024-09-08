@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公交站选择</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        tr:hover {
+            background-color: red;
+            color: white;
+        }
+        .selected {
+            background-color: gray;
+            color: white;
+        }
+        .selected-stations {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .station-button {
+            border: 1px solid #000;
+            padding: 10px;
+            margin: 5px;
+            cursor: move;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            width: 100px; /* 固定宽度 */
+            text-align: center;
+        }
+        .station-button.over {
+            border: 2px dashed #007bff; /* 拖动时高亮 */
+        }
+        .pagination {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .pagination button {
+            margin: 0 5px;
+            padding: 5px 10px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .pagination button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .pagination span {
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>选择公交站</h1>
+
+    <table id="stationTable">
+        <thead>
+            <tr>
+                <th>站点名字</th>
+                <th>地点</th>
+            </tr>
+        </thead>
+        <tbody id="stationBody">
+            <!-- 站点信息将通过 JavaScript 动态生成 -->
+        </tbody>
+    </table>
+
+    <div class="pagination" id="pagination"></div>
+
+    <div class="selected-stations" id="selectedStations"></div>
+
+    <button id="submitBtn">提交</button>
+
+    <script>
+        const selectedStationsContainer = document.getElementById('selectedStations');
+        const stationBody = document.getElementById('stationBody');
+        const pagination = document.getElementById('pagination');
+        let selectedStations = [];
+        const stationsPerPage = 6;
+        const totalStations = 50;
+        const stations = Array.from({ length: totalStations }, (_, i) => ({
+            name: `站点${i + 1}`,
+            location: `地点${i + 1}`,
+        }));
+
+        function renderStations() {
+            stationBody.innerHTML = '';
+            const start = (currentPage - 1) * stationsPerPage;
+            const end = start + stationsPerPage;
+            const displayStations = stations.slice(start, end);
+
+            displayStations.forEach(station => {
+                const row = document.createElement('tr');
+                row.dataset.name = station.name;
+                row.dataset.location = station.location;
+
+                row.innerHTML = `<td>${station.name}</td><td>${station.location}</td>`;
+                stationBody.appendChild(row);
+
+                // 选中状态保持
+                if (selectedStations.includes(station.name)) {
+                    row.classList.add('selected');
+                }
+
+                row.addEventListener('click', () => {
+                    const index = selectedStations.indexOf(station.name);
+                    if (index === -1) {
+                        selectedStations.push(station.name);
+                        row.classList.add('selected');
+                    } else {
+                        selectedStations.splice(index, 1);
+                        row.classList.remove('selected');
+                    }
+                    updateSelectedStations();
+                });
+            });
+        }
+
+        function renderPagination() {
+            pagination.innerHTML = '';
+            const totalPages = Math.ceil(totalStations / stationsPerPage);
+
+            const createButton = (text, page) => {
+                const button = document.createElement('button');
+                button.textContent = text;
+                button.addEventListener('click', () => {
+                    currentPage = page;
+                    renderStations();
+                    renderPagination();
+                });
+                return button;
+            };
+
+            if (currentPage > 1) {
+                pagination.appendChild(createButton('<', currentPage - 1));
+            }
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    const pageButton = createButton(i, i);
+                    if (i === currentPage) {
+                        pageButton.disabled = true;
+                    }
+                    pagination.appendChild(pageButton);
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    pagination.appendChild(ellipsis);
+                }
+            }
+
+            if (currentPage < totalPages) {
+                pagination.appendChild(createButton('>', currentPage + 1));
+            }
+        }
+
+        function updateSelectedStations() {
+            selectedStationsContainer.innerHTML = '';
+            selectedStations.forEach(station => {
+                const stationButton = document.createElement('div');
+                stationButton.className = 'station-button';
+                stationButton.textContent = station;
+
+                stationButton.setAttribute('draggable', true);
+                stationButton.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', station);
+                });
+
+                stationButton.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    stationButton.classList.add('over'); // 高亮显示
+                });
+
+                stationButton.addEventListener('dragleave', () => {
+                    stationButton.classList.remove('over'); // 去掉高亮
+                });
+
+                stationButton.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const draggedStationName = e.dataTransfer.getData('text/plain');
+                    const draggingStation = Array.from(selectedStationsContainer.children).find(
+                        button => button.textContent === draggedStationName
+                    );
+
+                    if (draggingStation && stationButton !== draggingStation) {
+                        selectedStationsContainer.insertBefore(draggingStation, stationButton);
+                        selectedStations = Array.from(selectedStationsContainer.children).map(button => button.textContent);
+                    }
+                });
+
+                selectedStationsContainer.appendChild(stationButton);
+            });
+        }
+
+        document.getElementById('submitBtn').addEventListener('click', () => {
+            alert('选择的公交站顺序: ' + selectedStations.join(', '));
+            location.reload();
+        });
+
+        // 初始化渲染
+        let currentPage = 1;
+        renderStations();
+        renderPagination();
+    </script>
+
+</body>
+</html>
