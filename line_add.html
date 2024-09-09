@@ -13,12 +13,11 @@
     <link href="./vendor/jqvmap/css/jqvmap.min.css" rel="stylesheet">
     <link href="./css/style.css" rel="stylesheet">   
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"> -->
         <!-- Datatable -->
         <link href="./vendor/datatables/css/jquery.dataTables.min.css" rel="stylesheet">
             <!-- Custom Stylesheet -->
-    <link href="./css/style.css" rel="stylesheet">
-        <!-- Toastr -->
-        <link rel="stylesheet" href="./vendor/toastr/css/toastr.min.css">
+        <link href="./css/style.css" rel="stylesheet">
     <!-- <style>
         body {
             font-family: Arial, sans-serif;
@@ -530,7 +529,7 @@ input[type="number"] {
                                 </div>
                                 
                                 <button id="submitBtn" class="btn btn-secondary" onclick="addBusline()">提交</button>  
-                                <button id="testBtn" class="btn btn-secondary" onclick="Test()" style="color: greenyellow;">Test</button>            
+                                <!-- <button id="testBtn" class="btn btn-secondary" onclick="Test()" style="color: greenyellow;">Test</button>             -->
                              </div>
 
                         </div>
@@ -636,34 +635,49 @@ async function addStationSequence(id, order, lineNumber) {
     const Order = order;
     const LineNumber = lineNumber;
     const csrfToken = await getCsrfToken();
-    const response = fetch('http://127.0.0.1:8000/catalog/api/station_sequence/create',{
+    const response = fetch('http://127.0.0.1:8000/catalog/api/stationSequence/add',{
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': csrfToken // 添加 CSRF 令牌
         },
         body: JSON.stringify({
-                busline: LineNumber,
+                busline: lineID,
                 station: Id,
                 order: Order
             }),
     })
     .then(response => {
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error('Failed to add station sequence');
             }
             return response.json();
         })
         .then(data => {
-            Swal.fire({ icon: 'success', title: '成功!', text: '已创建站点顺序' });
+            //Swal.fire({ icon: 'success', title: '成功!', text: `one station sequence:${lineID,Id,Order} has been added` });
         })
         .catch((error) => {
-            Swal.fire({ icon: 'error', title: '错误!', text: error });
+            //Swal.fire({ icon: 'error', title: '错误!', text: error });
         });
 }
 
-//submit the final information:
+let buslineInfo;
+//create a bus-line in database:
 async function addBusline() {
+    // 获取所有的timeline-panel元素
+const timelinePanels = document.querySelectorAll('.timeline-panel.text-muted');
+// 创建一个数组来存储信息
+const stationNames = [];
+
+// 遍历每个元素并将其信息添加到数组中
+timelinePanels.forEach(panel => {
+    stationNames.push(panel.innerText);
+});
+    if(stationNames.length === 0){
+    Swal.fire({ icon: 'warning', title: '警告', text: '尚未添加任何站点' });
+    return ;
+    }
+
     const inputData = {
         lineNumber: document.getElementById('lineNumber').value,
         status: 'b',
@@ -689,34 +703,29 @@ async function addBusline() {
                 return response.json();
             })
             .then(data => {
-                alert("succeeded");
+                //Swal.fire({ icon: 'success', title: '成功！', text: '线路已上传' });
             })
             .catch(error => {
-                alert("failed");
+                Swal.fire({ icon: 'error', title: '失败！', text: 'cannot post data' });
             });
        
-        const response2 = await fetch('http://127.0.0.1:8000/catalog/api/busline/get/${lineNumber}', {
-        method: 'POST',
+        const response2 = await fetch(`http://127.0.0.1:8000/catalog/api/busline/get/${inputData.lineNumber}`, {
         headers: {
-            'Content-Type': 'application/json',
             'X-CSRFToken': csrfToken // 添加 CSRF 令牌
-        },
-        body: JSON.stringify(inputData),
+        },     
     })
-    .then(response2 => {
-                if (!response.ok) {
-                    throw new Error('网络错误或输入无效');
-                }
-                return response2.json();
-            })
-            .then(data => {
-                alert("succeeded");
-            })
-            .catch(error => {
-                alert("failed");
-            });
+    
+    if(response2.ok){
+        buslineInfo = await response2.json();
+        lineID = buslineInfo.id;
+        //Swal.fire({ icon: 'success', title: '成功!', text: `bus-line ${buslineInfo.lineNumber}'s id(${buslineInfo.id}) fetched` });
+    }else{
+        Swal.fire({ icon: 'error', title: '错误!', text: 'failed to fetch bus-line id' });
+    }
        
     addAllStationSequence();
+    Swal.fire({ icon: 'success', title: '成功！', text: '线路已上传' });
+    location.reload();
 }
     
 //nextBtn:
@@ -741,23 +750,23 @@ document.getElementById('nextBtn').addEventListener('click', function(event) {
     lineInfo_ifEmpty = false;
     myDiv1.style.display = 'none';
     myDiv2.style.display = SHOW;
-    alert('信息已保存');
+    Swal.fire({ icon: 'success', title: '成功!', text: '信息已保存' });
     }
 });
 
-function Test(){
-    // 获取所有的timeline-panel元素
-const timelinePanels = document.querySelectorAll('.timeline-panel.text-muted');
-// 创建一个数组来存储信息
-const stationNames = [];
+// function Test(){
+//     // 获取所有的timeline-panel元素
+// const timelinePanels = document.querySelectorAll('.timeline-panel.text-muted');
+// // 创建一个数组来存储信息
+// const stationNames = [];
 
-// 遍历每个元素并将其信息添加到数组中
-timelinePanels.forEach(panel => {
-    stationNames.push(panel.innerText);
-});
+// // 遍历每个元素并将其信息添加到数组中
+// timelinePanels.forEach(panel => {
+//     stationNames.push(panel.innerText);
+// });
 
-alert(stationNames.join(', '));
-}
+// alert(stationNames.join(', '));
+// }
 
 async function addAllStationSequence(){
 // 获取所有的timeline-panel元素
@@ -770,16 +779,21 @@ timelinePanels.forEach(panel => {
     stationNames.push(panel.innerText);
 });
 
+
+    //Swal.fire({ icon: 'warning', title: '警告', text: '尚未添加任何站点' });
+
 stationNames.forEach(async (item,index)=>{
     const id = Stations[item].id;
     const order = index;
-    //await addStationSequence(id,order,lineNumberRecord);
-    alert(`(sName:${item},id:${id},order:${index},busLine:${lineNumberRecord})`)
+    await addStationSequence(id,order,lineNumberRecord);
+    //alert(`(sName:${item},id:${id},order:${index},busLine:${lineNumberRecord})`)
 });
+}
+
 
 // // 使用join方法将数组转换为字符串，并显示在alert中
 // alert(stationNames.join(', '));
-}
+
 
 
 // 状态映射
@@ -809,7 +823,7 @@ async function fetchStations() {
         const stations = await response.json();
         //loadStationsOnMap(stations); // 加载站点到地图
         displayStations(stations); // 显示站点信息表格
-        Swal.fire({ icon: 'success', title: '成功!', text: '已保存' });
+        //Swal.fire({ icon: 'success', title: '成功!', text: '加载完成' });
     } else {
         const errorData = await response.json();
         //Swal.fire({ icon: 'error', title: '错误!', text: errorData.detail || '获取站点信息失败。' });
@@ -914,6 +928,10 @@ stops.forEach(stop => {
 });
 
         }
+
+
+
+
 
 
 </script>
