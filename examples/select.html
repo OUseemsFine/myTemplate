@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>表格行选中示例</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+            cursor: pointer;
+        }
+        .selected {
+            background-color: #007bff;
+            color: white;
+        }
+        button {
+            margin: 10px 0;
+            padding: 10px 15px;
+            border: none;
+            color: white;
+            background-color: #007bff;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<h2>选择表格行</h2>
+<button id="selectButton">选择行</button>
+<table>
+    <thead>
+        <tr>
+            <th>姓名</th>
+            <th>年龄</th>
+            <th>城市</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>张三</td>
+            <td>25</td>
+            <td>北京</td>
+        </tr>
+        <tr>
+            <td>李四</td>
+            <td>30</td>
+            <td>上海</td>
+        </tr>
+        <tr>
+            <td>王五</td>
+            <td>28</td>
+            <td>广州</td>
+        </tr>
+    </tbody>
+</table>
+
+<script>
+    const rows = document.querySelectorAll('tbody tr');
+    const selectButton = document.getElementById('selectButton');
+
+    rows.forEach(row => {
+        row.addEventListener('click', () => {
+            row.classList.toggle('selected');
+        });
+    });
+
+    selectButton.addEventListener('click', () => {
+        rows.forEach(row => {
+            if (row.classList.contains('selected')) {
+                alert('选中的行: ' + row.cells[0].textContent + row.cells[1].textContent + row.cells[2].textContent);
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

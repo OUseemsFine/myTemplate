@@ -82,6 +82,61 @@
     </style> -->
     <!-- table style: -->
         <style>
+
+/* check busLine number if_validate style */
+input[type="number"] {
+            padding: 10px;
+            width: 200px;
+            margin-right: 10px;
+        }
+.message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+.exists {
+            color: red;
+            background-color: #f8d7da;
+        }
+.not-exists {
+            color: green;
+            background-color: #d4edda;
+        }
+
+/*  drag stop: */
+
+.stopContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* 这行可以保留，如果你希望在 flex 元素之间有间隔 */
+}
+
+.error {
+            color: red;
+            display: none; /* 默认隐藏 */
+            margin-left: 10px;
+        }
+
+.drag{ }
+
+.stop {
+    background-color: purple;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: move;
+    user-select: none;
+    transition: background-color 0.3s;
+    margin-bottom: 10px; /* 添加下边距，确保每个 stop 之间有间隔 */
+}
+
+.stop:last-child {
+    margin-bottom: 0; /* 最后一个 stop 不需要下边距 */
+}
+
+.stop:hover {
+    background-color: #0056b3;
+}
             tr:hover {
                 background-color: purple;
                 color: purple;
@@ -91,7 +146,7 @@
                 color: violet;
             }
         </style>
-    <style>
+    <!-- <style>
         .highlight {
             font-size: 32px;
             color: orange; /* 已标亮颜色 */
@@ -108,7 +163,7 @@
             font-size: 32px;
             color: blueviolet;
         }
-    </style> 
+    </style>  -->
 
     <!--style of this page-->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
@@ -382,7 +437,7 @@
                 
 
                 <div class="row" id="part-1" style="display: none;">
-                    <div class="col-xl-6 col-xxl-12">
+                    <div class="col-sm-12">
                         <div id="card-1" class="card">
                             <div class="card-header">
                                 <h4 class="card-title">基本信息</h4>
@@ -394,7 +449,8 @@
                                         <div class="form-row">
                                             <div class="form-group col-md-6">
                                                 <label>线路号</label>
-                                                <input id="Number" type="text" class="form-control" placeholder="请输入线路号" required="true">
+                                                <input oninput="checkBusline()" id="lineNumber" type="number" class="form-control" placeholder="请输入线路号" required="true">
+                                                <div id="result" class="message" style="display:none;"></div>
                                             </div>
                                             <div class="form-group col-md-6">
                                             </div>
@@ -414,7 +470,7 @@
                                             </div>
                                             <div class="form-group col-md-6">
                                                 <label>票价</label>
-                                                <input id="Price" type="text" class="form-control" placeholder="请输入票价" required="true">
+                                                <input id="Price" type="number" step="0.01" oninput="this.value = parseFloat(this.value).toFixed(2) || ''" class="form-control" placeholder="请输入票价" required="true">
                                             </div>
                                             <div class="form-group col-md-6">
                                             </div>
@@ -446,7 +502,7 @@
                                                 </label>
                                             </div>
                                         </div> -->
-                                        <button type="submit" class="btn btn-primary">下一步</button>
+                                        <button  id="nextBtn" class="btn btn-primary" >下一步</button>
                                     </form>
                                 </div>
                             </div>
@@ -458,7 +514,7 @@
 
                 <div class="row" id="part-2">
                     
-                    <div class="col-xl-6 col-xxl-6 col-sm-6" >
+                    <div class="col-sm-9" >
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="card-title">选择沿途站点</h4>
@@ -476,480 +532,30 @@
                                                 <th>位置</th>
                                             </tr>
                                         </thead>
-                                        <!-- <tbody>
-                                            <tr>
-                                                <td>Tiger Nixon</td>
-                                                <td>System Architect</td>
-                                                <td>Edinburgh</td>
-                                                <td>61</td>
-                                                <td>2011/04/25</td>
-                                                <td>$320,800</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Garrett Winters</td>
-                                                <td>Accountant</td>
-                                                <td>Tokyo</td>
-                                                <td>63</td>
-                                                <td>2011/07/25</td>
-                                                <td>$170,750</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Ashton Cox</td>
-                                                <td>Junior Technical Author</td>
-                                                <td>San Francisco</td>
-                                                <td>66</td>
-                                                <td>2009/01/12</td>
-                                                <td>$86,000</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Cedric Kelly</td>
-                                                <td>Senior Javascript Developer</td>
-                                                <td>Edinburgh</td>
-                                                <td>22</td>
-                                                <td>2012/03/29</td>
-                                                <td>$433,060</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Airi Satou</td>
-                                                <td>Accountant</td>
-                                                <td>Tokyo</td>
-                                                <td>33</td>
-                                                <td>2008/11/28</td>
-                                                <td>$162,700</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Brielle Williamson</td>
-                                                <td>Integration Specialist</td>
-                                                <td>New York</td>
-                                                <td>61</td>
-                                                <td>2012/12/02</td>
-                                                <td>$372,000</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Herrod Chandler</td>
-                                                <td>Sales Assistant</td>
-                                                <td>San Francisco</td>
-                                                <td>59</td>
-                                                <td>2012/08/06</td>
-                                                <td>$137,500</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Rhona Davidson</td>
-                                                <td>Integration Specialist</td>
-                                                <td>Tokyo</td>
-                                                <td>55</td>
-                                                <td>2010/10/14</td>
-                                                <td>$327,900</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Colleen Hurst</td>
-                                                <td>Javascript Developer</td>
-                                                <td>San Francisco</td>
-                                                <td>39</td>
-                                                <td>2009/09/15</td>
-                                                <td>$205,500</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Sonya Frost</td>
-                                                <td>Software Engineer</td>
-                                                <td>Edinburgh</td>
-                                                <td>23</td>
-                                                <td>2008/12/13</td>
-                                                <td>$103,600</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Jena Gaines</td>
-                                                <td>Office Manager</td>
-                                                <td>London</td>
-                                                <td>30</td>
-                                                <td>2008/12/19</td>
-                                                <td>$90,560</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Quinn Flynn</td>
-                                                <td>Support Lead</td>
-                                                <td>Edinburgh</td>
-                                                <td>22</td>
-                                                <td>2013/03/03</td>
-                                                <td>$342,000</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Charde Marshall</td>
-                                                <td>Regional Director</td>
-                                                <td>San Francisco</td>
-                                                <td>36</td>
-                                                <td>2008/10/16</td>
-                                                <td>$470,600</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Haley Kennedy</td>
-                                                <td>Senior Marketing Designer</td>
-                                                <td>London</td>
-                                                <td>43</td>
-                                                <td>2012/12/18</td>
-                                                <td>$313,500</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Tatyana Fitzpatrick</td>
-                                                <td>Regional Director</td>
-                                                <td>London</td>
-                                                <td>19</td>
-                                                <td>2010/03/17</td>
-                                                <td>$385,750</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Michael Silva</td>
-                                                <td>Marketing Designer</td>
-                                                <td>London</td>
-                                                <td>66</td>
-                                                <td>2012/11/27</td>
-                                                <td>$198,500</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Paul Byrd</td>
-                                                <td>Chief Financial Officer (CFO)</td>
-                                                <td>New York</td>
-                                                <td>64</td>
-                                                <td>2010/06/09</td>
-                                                <td>$725,000</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gloria Little</td>
-                                                <td>Systems Administrator</td>
-                                                <td>New York</td>
-                                                <td>59</td>
-                                                <td>2009/04/10</td>
-                                                <td>$237,500</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Bradley Greer</td>
-                                                <td>Software Engineer</td>
-                                                <td>London</td>
-                                                <td>41</td>
-                                                <td>2012/10/13</td>
-                                                <td>$132,000</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Dai Rios</td>
-                                                <td>Personnel Lead</td>
-                                                <td>Edinburgh</td>
-                                                <td>35</td>
-                                                <td>2012/09/26</td>
-                                                <td>$217,500</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Jenette Caldwell</td>
-                                                <td>Development Lead</td>
-                                                <td>New York</td>
-                                                <td>30</td>
-                                                <td>2011/09/03</td>
-                                                <td>$345,000</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Yuri Berry</td>
-                                                <td>Chief Marketing Officer (CMO)</td>
-                                                <td>New York</td>
-                                                <td>40</td>
-                                                <td>2009/06/25</td>
-                                                <td>$675,000</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Caesar Vance</td>
-                                                <td>Pre-Sales Support</td>
-                                                <td>New York</td>
-                                                <td>21</td>
-                                                <td>2011/12/12</td>
-                                                <td>$106,450</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Doris Wilder</td>
-                                                <td>Sales Assistant</td>
-                                                <td>Sidney</td>
-                                                <td>23</td>
-                                                <td>2010/09/20</td>
-                                                <td>$85,600</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Angelica Ramos</td>
-                                                <td>Chief Executive Officer (CEO)</td>
-                                                <td>London</td>
-                                                <td>47</td>
-                                                <td>2009/10/09</td>
-                                                <td>$1,200,000</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gavin Joyce</td>
-                                                <td>Developer</td>
-                                                <td>Edinburgh</td>
-                                                <td>42</td>
-                                                <td>2010/12/22</td>
-                                                <td>$92,575</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Jennifer Chang</td>
-                                                <td>Regional Director</td>
-                                                <td>Singapore</td>
-                                                <td>28</td>
-                                                <td>2010/11/14</td>
-                                                <td>$357,650</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Brenden Wagner</td>
-                                                <td>Software Engineer</td>
-                                                <td>San Francisco</td>
-                                                <td>28</td>
-                                                <td>2011/06/07</td>
-                                                <td>$206,850</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Fiona Green</td>
-                                                <td>Chief Operating Officer (COO)</td>
-                                                <td>San Francisco</td>
-                                                <td>48</td>
-                                                <td>2010/03/11</td>
-                                                <td>$850,000</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Shou Itou</td>
-                                                <td>Regional Marketing</td>
-                                                <td>Tokyo</td>
-                                                <td>20</td>
-                                                <td>2011/08/14</td>
-                                                <td>$163,000</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Michelle House</td>
-                                                <td>Integration Specialist</td>
-                                                <td>Sidney</td>
-                                                <td>37</td>
-                                                <td>2011/06/02</td>
-                                                <td>$95,400</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Suki Burks</td>
-                                                <td>Developer</td>
-                                                <td>London</td>
-                                                <td>53</td>
-                                                <td>2009/10/22</td>
-                                                <td>$114,500</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Prescott Bartlett</td>
-                                                <td>Technical Author</td>
-                                                <td>London</td>
-                                                <td>27</td>
-                                                <td>2011/05/07</td>
-                                                <td>$145,000</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gavin Cortez</td>
-                                                <td>Team Leader</td>
-                                                <td>San Francisco</td>
-                                                <td>22</td>
-                                                <td>2008/10/26</td>
-                                                <td>$235,500</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Martena Mccray</td>
-                                                <td>Post-Sales support</td>
-                                                <td>Edinburgh</td>
-                                                <td>46</td>
-                                                <td>2011/03/09</td>
-                                                <td>$324,050</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Unity Butler</td>
-                                                <td>Marketing Designer</td>
-                                                <td>San Francisco</td>
-                                                <td>47</td>
-                                                <td>2009/12/09</td>
-                                                <td>$85,675</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Howard Hatfield</td>
-                                                <td>Office Manager</td>
-                                                <td>San Francisco</td>
-                                                <td>51</td>
-                                                <td>2008/12/16</td>
-                                                <td>$164,500</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Hope Fuentes</td>
-                                                <td>Secretary</td>
-                                                <td>San Francisco</td>
-                                                <td>41</td>
-                                                <td>2010/02/12</td>
-                                                <td>$109,850</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Vivian Harrell</td>
-                                                <td>Financial Controller</td>
-                                                <td>San Francisco</td>
-                                                <td>62</td>
-                                                <td>2009/02/14</td>
-                                                <td>$452,500</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Timothy Mooney</td>
-                                                <td>Office Manager</td>
-                                                <td>London</td>
-                                                <td>37</td>
-                                                <td>2008/12/11</td>
-                                                <td>$136,200</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Jackson Bradshaw</td>
-                                                <td>Director</td>
-                                                <td>New York</td>
-                                                <td>65</td>
-                                                <td>2008/09/26</td>
-                                                <td>$645,750</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Olivia Liang</td>
-                                                <td>Support Engineer</td>
-                                                <td>Singapore</td>
-                                                <td>64</td>
-                                                <td>2011/02/03</td>
-                                                <td>$234,500</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Bruno Nash</td>
-                                                <td>Software Engineer</td>
-                                                <td>London</td>
-                                                <td>38</td>
-                                                <td>2011/05/03</td>
-                                                <td>$163,500</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Sakura Yamamoto</td>
-                                                <td>Support Engineer</td>
-                                                <td>Tokyo</td>
-                                                <td>37</td>
-                                                <td>2009/08/19</td>
-                                                <td>$139,575</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Thor Walton</td>
-                                                <td>Developer</td>
-                                                <td>New York</td>
-                                                <td>61</td>
-                                                <td>2013/08/11</td>
-                                                <td>$98,540</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Finn Camacho</td>
-                                                <td>Support Engineer</td>
-                                                <td>San Francisco</td>
-                                                <td>47</td>
-                                                <td>2009/07/07</td>
-                                                <td>$87,500</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Serge Baldwin</td>
-                                                <td>Data Coordinator</td>
-                                                <td>Singapore</td>
-                                                <td>64</td>
-                                                <td>2012/04/09</td>
-                                                <td>$138,575</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Zenaida Frank</td>
-                                                <td>Software Engineer</td>
-                                                <td>New York</td>
-                                                <td>63</td>
-                                                <td>2010/01/04</td>
-                                                <td>$125,250</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Zorita Serrano</td>
-                                                <td>Software Engineer</td>
-                                                <td>San Francisco</td>
-                                                <td>56</td>
-                                                <td>2012/06/01</td>
-                                                <td>$115,000</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Jennifer Acosta</td>
-                                                <td>Junior Javascript Developer</td>
-                                                <td>Edinburgh</td>
-                                                <td>43</td>
-                                                <td>2013/02/01</td>
-                                                <td>$75,650</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Cara Stevens</td>
-                                                <td>Sales Assistant</td>
-                                                <td>New York</td>
-                                                <td>46</td>
-                                                <td>2011/12/06</td>
-                                                <td>$145,600</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Hermione Butler</td>
-                                                <td>Regional Director</td>
-                                                <td>London</td>
-                                                <td>47</td>
-                                                <td>2011/03/21</td>
-                                                <td>$356,250</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Lael Greer</td>
-                                                <td>Systems Administrator</td>
-                                                <td>London</td>
-                                                <td>21</td>
-                                                <td>2009/02/27</td>
-                                                <td>$103,500</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Jonas Alexander</td>
-                                                <td>Developer</td>
-                                                <td>San Francisco</td>
-                                                <td>30</td>
-                                                <td>2010/07/14</td>
-                                                <td>$86,500</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Shad Decker</td>
-                                                <td>Regional Director</td>
-                                                <td>Edinburgh</td>
-                                                <td>51</td>
-                                                <td>2008/11/13</td>
-                                                <td>$183,000</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Michael Bruce</td>
-                                                <td>Javascript Developer</td>
-                                                <td>Singapore</td>
-                                                <td>29</td>
-                                                <td>2011/06/27</td>
-                                                <td>$183,000</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Donna Snider</td>
-                                                <td>Customer Support</td>
-                                                <td>New York</td>
-                                                <td>27</td>
-                                                <td>2011/01/25</td>
-                                                <td>$112,000</td>
-                                            </tr>
-                                        </tbody>
-                                        <tfoot>
-                                            <tr>
-                                                <th>Name</th>
-                                                <th>Position</th>
-                                                <th>Office</th>
-                                                <th>Age</th>
-                                                <th>Start date</th>
-                                                <th>Salary</th>
-                                            </tr>
-                                        </tfoot> -->
                                         <tbody id="station-table"></tbody>
                                     </table>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+
+                    <div class="col-sm-3">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">已添加站点</h4>
+                             </div>
+                             <div class="card-body">
+                                <div class="widget-timeline">
+                                    <ul class="timeline" id="selected_Stations">
+                                    </ul>
+                                </div>
+                                
+                                <button id="submitBtn" class="btn btn-secondary">提交</button>             
+                             </div>
+
+                        </div>
+                    </div>  
 
                     
                 
@@ -972,7 +578,7 @@
                                     </tbody>
                                     
                                 </table>
-                            
+                                <div></div>
                                 <div class="pagination" id="pagination"></div>
                             
                                 <!-- <div class="selected-stations" id="selectedStations"></div>
@@ -983,20 +589,6 @@
                         </div>
                     </div>
 
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4 class="card-title">已添加站点</h4>
-                             </div>
-                             <div class="card-body">
-                                <div class="selected-stations" id="selectedStations"></div>
-                            
-                                <button id="submitBtn">提交</button>
-
-                             </div>
-
-                        </div>
-                    </div>  
                             
                 </div>
                 
@@ -1011,7 +603,129 @@
         Scripts
     ***********************************-->
     <script>
-    //-----------------fetch data part:
+    window.onload = fetchStations();
+    const myDiv1 = document.getElementById('part-1');
+    const myDiv2 = document.getElementById('part-2');
+    const SHOW = myDiv2.style.display;
+    myDiv2.style.display = 'none';
+    myDiv1.style.display = SHOW;
+    let lineInfo = {};
+    let Stations = {};
+    let lineInfo_ifEmpty = true;
+    let lineNumberValid;
+
+//check if busLine number is used or not:
+function checkBusline() {
+            const lineNumber = document.getElementById('lineNumber').value;
+            const resultDiv = document.getElementById('result');
+
+            if (!lineNumber) {
+                resultDiv.style.display = 'none';
+                return;
+            }
+
+            fetch(`http://127.0.0.1:8000/catalog/api/busline/exist/${lineNumber}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        resultDiv.className = 'message exists';
+                        resultDiv.textContent = '该公交线路已存在！';
+                        lineNumberValid = false;
+                    } else {
+                        resultDiv.className = 'message not-exists';
+                        resultDiv.textContent = '该公交线路可用！';
+                        lineNumberValid = true;
+                    }
+                    resultDiv.style.display = 'block';
+                })
+                .catch(error => {
+                    resultDiv.className = 'message exists';
+                    resultDiv.textContent = '检查线路时发生错误！';
+                    resultDiv.style.display = 'block';
+                });
+        }
+    
+//nextBtn
+document.getElementById('nextBtn').addEventListener('click', function(event) {
+    event.preventDefault();
+    // 收集表单数据
+    // const lineNumber = document.getElementById('lineNumber').value;
+    // const startTime = document.getElementById('startTime').value;
+    // const endTime = document.getElementById('endTime').value;
+    // const price = document.getElementById('Price').value;
+    // const description = document.getElementById('Description').value;
+        // 收集表单数据
+    const lineNumber = document.getElementById('lineNumber').value.trim();  // 去除空格
+    const startTime = document.getElementById('startTime').value.trim();
+    const endTime = document.getElementById('endTime').value.trim();
+    const price = document.getElementById('Price').value.trim();
+    const description = document.getElementById('Description').value.trim();
+    let noneEmpty = true;
+
+    // 验证每一项不能为空
+    if (!lineNumber || !startTime || !endTime || !price || !description) {
+        alert('所有字段都必须填写！');
+        noneEmpty = false;
+    }
+
+
+    // 可选：在此处添加代码将数据保存到服务器或本地存储
+    if(noneEmpty&&lineNumberValid){
+    // 创建一个对象存储数据
+    lineInfo = {
+        lineNumber: lineNumber,
+        startTime: startTime,
+        endTime: endTime,
+        price: price,
+        description: description,
+    };
+    lineInfo_ifEmpty = false;
+    myDiv1.style.display = 'none';
+    myDiv2.style.display = SHOW;
+    alert('信息已保存');
+    }
+});
+
+
+//submit data:
+const submitBtn = document.getElementById('submitBtn');
+
+// submitBtn.addEventListener('click', async function(event) {
+//     event.preventDefault(); 
+
+//     // 获取所有的timeline-panel元素
+//     const timelinePanels = document.querySelectorAll('.timeline-panel.text-muted');
+//     // 创建一个数组来存储信息
+//     const stationNames = [];
+
+//     // 遍历每个元素并将其信息添加到数组中
+//     timelinePanels.forEach(panel => {
+//         stationNames.push(panel.innerText);
+//     });
+
+//     // 使用join方法将数组转换为字符串，并显示在alert中
+//     alert(stationNames.join(', '));
+
+//     const csrfToken = await getCsrfToken();
+//     if(!lineInfo_ifEmpty){
+//     const response = await fetch('http://127.0.0.1:8000/catalog/api/busline/add', {
+//         method: 'PATCH',
+//         headers: {
+//             'Content-Type': 'application/json',
+//             'X-CSRFToken': csrfToken // 添加 CSRF 令牌
+//         },
+//         body: JSON.stringify({
+//             status: 'b',
+//             startTime: lineInfo.startTime,
+//             endTime: lineInfo.endTime,
+//             lineNumber: lineInfo.lineNumber,
+//             Price: lineInfo.price,
+//             description: lineInfo.description,
+//         })
+//     });
+// }
+// });
+
 
 // 状态映射
 const statusMapping = {
@@ -1047,17 +761,13 @@ async function fetchStations() {
         const stations = await response.json();
         //loadStationsOnMap(stations); // 加载站点到地图
         displayStations(stations); // 显示站点信息表格
-        Swal.fire({ icon: 'success', title: '成功!', text: '站点信息已成功加载。' });
+        Swal.fire({ icon: 'success', title: '成功!', text: '已保存' });
     } else {
         const errorData = await response.json();
-        Swal.fire({ icon: 'error', title: '错误!', text: errorData.detail || '获取站点信息失败。' });
+        //Swal.fire({ icon: 'error', title: '错误!', text: errorData.detail || '获取站点信息失败。' });
     }
 }
-window.onload(fetchStations());
-
-
-const selectedStationsContainer = document.getElementById('selectedStations');
-
+//window.onload = fetchStations();
 
 
 //显示站点信息
@@ -1070,148 +780,90 @@ function displayStations(stations) {
         row.innerHTML = `
             <td>${station.sName}</td>
             <td>${station.id}</td>
-            
             <td><span class="${statusClassMapping[station.status] || ''}">${statusMapping[station.status] || '未知状态'}</span></td>
             <td>${station.latitude}, ${station.longitude}</td>
         `;
-
+        row.addEventListener('click',()=>{
+            if (row.classList.contains(`${station.sName}`)) {
+                row.classList.remove(`${station.sName}`);
+                delete Stations[station.sName];
+            }else{
+                row.classList.toggle(`${station.sName}`);
+                Stations[station.sName] = station;
+            }
+            // if (row.classList.contains(`${station.id}`)) {
+            //     alert('选中的行: ' +(station.id in Stations)+ Stations[station.id].sName);
+            // }else{
+            //     alert('移除的行: ' + (station.id in Stations));
+            // }
+            updateSelectedStations();
+        });
 
         tableBody.appendChild(row);
     });
     
  }
+ 
+
+ function updateSelectedStations() {
+        let draggedItem = null;
+             const divBody = document.getElementById('selected_Stations');
+             divBody.innerHTML = ``;
+            //selectedStationsContainer.innerHTML = '';
+            Object.values(Stations).forEach(station => {
+                const draggableStop = document.createElement('li');
+                draggableStop.className = `drag`;
+                draggableStop.innerHTML = `
+                <div class="timeline-badge primary"></div>
+                <div class="timeline-panel text-muted"  draggable="true" id="${station.sName}">${station.sName}</div>
+                `;
+                divBody.appendChild(draggableStop);
+  
+            });
+
+             // 添加拖动事件
+const stops = divBody.querySelectorAll('.drag'); // 查询 divBody 中的所有 stop
+
+stops.forEach(stop => {
+    stop.addEventListener('dragstart', () => {
+        draggedItem = stop;
+        setTimeout(() => {
+            stop.style.display = 'none';
+        }, 0);
+    });
+
+    stop.addEventListener('dragend', () => {
+        setTimeout(() => {
+            draggedItem = null;
+            stop.style.display = 'block';
+        }, 0);
+    });
+
+    stop.addEventListener('dragover', (event) => {
+        event.preventDefault();
+    });
+
+    stop.addEventListener('drop', () => {
+        if (draggedItem !== stop) {
+            const allStops = Array.from(divBody.querySelectorAll('.stop'));
+            const draggedIndex = allStops.indexOf(draggedItem);
+            const targetIndex = allStops.indexOf(stop);
+
+            if (draggedIndex < targetIndex) {
+                stop.after(draggedItem);
+            } else {
+                stop.before(draggedItem);
+            }
+        }
+        
+    });
+});
+
+        }
 
 
-        //-----------------select station:
-        // const selectedStationsContainer = document.getElementById('selectedStations');
-        // const stationBody = document.getElementById('station-table');
-        // let selectedStations = [];
-        // const stationsPerPage = 6;
-        // const totalStations = 50;
-        // const stations = Array.from({ length: totalStations }, (_, i) => ({
-        //     name: `站点${i + 1}`,
-        //     location: `地点${i + 1}`,
-        // }));
 
-        // function renderStations() {
-        //     stationBody.innerHTML = '';
-        //     const start = (currentPage - 1) * stationsPerPage;
-        //     const end = start + stationsPerPage;
-        //     const displayStations = stations.slice(start, end);
-
-        //     displayStations.forEach(station => {
-        //         const row = document.createElement('tr');
-        //         row.dataset.name = station.name;
-        //         row.dataset.location = station.location;
-
-        //         row.innerHTML = `<td>${station.name}</td><td>${station.location}</td>`;
-        //         stationBody.appendChild(row);
-
-        //         // 选中状态保持
-        //         if (selectedStations.includes(station.name)) {
-        //             row.classList.add('selected');
-        //         }
-
-        //         row.addEventListener('click', () => {
-        //             const index = selectedStations.indexOf(station.name);
-        //             if (index === -1) {
-        //                 selectedStations.push(station.name);
-        //                 row.classList.add('selected');
-        //             } else {
-        //                 selectedStations.splice(index, 1);
-        //                 row.classList.remove('selected');
-        //             }
-        //             updateSelectedStations();
-        //         });
-        //     });
-        // }
-
-        // function renderPagination() {
-        //     pagination.innerHTML = '';
-        //     const totalPages = Math.ceil(totalStations / stationsPerPage);
-
-        //     const createButton = (text, page) => {
-        //         const button = document.createElement('button');
-        //         button.textContent = text;
-        //         button.addEventListener('click', () => {
-        //             currentPage = page;
-        //             renderStations();
-        //             renderPagination();
-        //         });
-        //         return button;
-        //     };
-
-        //     if (currentPage > 1) {
-        //         pagination.appendChild(createButton('<', currentPage - 1));
-        //     }
-
-        //     for (let i = 1; i <= totalPages; i++) {
-        //         if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-        //             const pageButton = createButton(i, i);
-        //             if (i === currentPage) {
-        //                 pageButton.disabled = true;
-        //             }
-        //             pagination.appendChild(pageButton);
-        //         } else if (i === currentPage - 2 || i === currentPage + 2) {
-        //             const ellipsis = document.createElement('span');
-        //             ellipsis.textContent = '...';
-        //             pagination.appendChild(ellipsis);
-        //         }
-        //     }
-
-        //     if (currentPage < totalPages) {
-        //         pagination.appendChild(createButton('>', currentPage + 1));
-        //     }
-        // }
-
-        // function updateSelectedStations() {
-        //     selectedStationsContainer.innerHTML = '';
-        //     selectedStations.forEach(station => {
-        //         const stationButton = document.createElement('div');
-        //         stationButton.className = 'station-button';
-        //         stationButton.textContent = station;
-
-        //         stationButton.setAttribute('draggable', true);
-        //         stationButton.addEventListener('dragstart', (e) => {
-        //             e.dataTransfer.setData('text/plain', station);
-        //         });
-
-        //         stationButton.addEventListener('dragover', (e) => {
-        //             e.preventDefault();
-        //             stationButton.classList.add('over'); // 高亮显示
-        //         });
-
-        //         stationButton.addEventListener('dragleave', () => {
-        //             stationButton.classList.remove('over'); // 去掉高亮
-        //         });
-
-        //         stationButton.addEventListener('drop', (e) => {
-        //             e.preventDefault();
-        //             const draggedStationName = e.dataTransfer.getData('text/plain');
-        //             const draggingStation = Array.from(selectedStationsContainer.children).find(
-        //                 button => button.textContent === draggedStationName
-        //             );
-
-        //             if (draggingStation && stationButton !== draggingStation) {
-        //                 selectedStationsContainer.insertBefore(draggingStation, stationButton);
-        //                 selectedStations = Array.from(selectedStationsContainer.children).map(button => button.textContent);
-        //             }
-        //         });
-
-        //         selectedStationsContainer.appendChild(stationButton);
-        //     });
-        // }
-
-        // document.getElementById('submitBtn').addEventListener('click', () => {
-        //     alert('选择的公交站顺序: ' + selectedStations.join(', '));
-        //     location.reload();
-        // });
-
-        // // 初始化渲染
-        // let currentPage = 1;
-        // renderStations();
-        // renderPagination();
-    </script>
+</script>
 
 
 

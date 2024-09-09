@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>可拖动汽车站点（垂直排列）</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .stop {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: move;
+            user-select: none;
+            transition: background-color 0.3s;
+        }
+        .stop:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="stopContainer">
+    <div class="stop" draggable="true">stop 1</div>
+    <div class="stop" draggable="true">stop 2</div>
+    <div class="stop" draggable="true">stop 3</div>
+    <div class="stop" draggable="true">stop 4</div>
+    <div class="stop" draggable="true">stop 5</div>
+    <div class="stop" draggable="true">stop 6</div>
+</div>
+
+<script>
+    const stops = document.querySelectorAll('.stop');
+    let draggedItem = null;
+
+    stops.forEach(stop => {
+        stop.addEventListener('dragstart', () => {
+            draggedItem = stop;
+            setTimeout(() => {
+                stop.style.display = 'none';
+            }, 0);
+        });
+
+        stop.addEventListener('dragend', () => {
+            setTimeout(() => {
+                draggedItem = null;
+                stop.style.display = 'block';
+            }, 0);
+        });
+
+        stop.addEventListener('dragover', (event) => {
+            event.preventDefault();
+        });
+
+        stop.addEventListener('drop', () => {
+            if (draggedItem !== stop) {
+                const allStops = Array.from(document.querySelectorAll('.stop'));
+                const draggedIndex = allStops.indexOf(draggedItem);
+                const targetIndex = allStops.indexOf(stop);
+
+                if (draggedIndex < targetIndex) {
+                    stop.after(draggedItem);
+                } else {
+                    stop.before(draggedItem);
+                }
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

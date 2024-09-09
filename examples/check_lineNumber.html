@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公交线路检查</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        input[type="number"] {
+            padding: 10px;
+            width: 200px;
+            margin-right: 10px;
+        }
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .exists {
+            color: red;
+            background-color: #f8d7da;
+        }
+        .not-exists {
+            color: green;
+            background-color: #d4edda;
+        }
+    </style>
+</head>
+<body>
+    <h1>检查公交线路是否存在</h1>
+    <input type="number" id="lineNumber" placeholder="请输入线路号" oninput="checkBusline()" />
+    <div id="result" class="message" style="display:none;"></div>
+
+    <script>
+        function checkBusline() {
+            const lineNumber = document.getElementById('lineNumber').value;
+            const resultDiv = document.getElementById('result');
+
+            if (!lineNumber) {
+                resultDiv.style.display = 'none';
+                return;
+            }
+
+            fetch(`http://127.0.0.1:8000/catalog/api/busline/exist/${lineNumber}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        resultDiv.className = 'message exists';
+                        resultDiv.textContent = '该公交线路已存在！';
+                    } else {
+                        resultDiv.className = 'message not-exists';
+                        resultDiv.textContent = '该公交线路可用！';
+                    }
+                    resultDiv.style.display = 'block';
+                })
+                .catch(error => {
+                    resultDiv.className = 'message exists';
+                    resultDiv.textContent = '检查线路时发生错误！';
+                    resultDiv.style.display = 'block';
+                });
+        }
+    </script>
+</body>
+</html>
