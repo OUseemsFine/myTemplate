@@ -17,6 +17,8 @@
         <link href="./vendor/datatables/css/jquery.dataTables.min.css" rel="stylesheet">
             <!-- Custom Stylesheet -->
     <link href="./css/style.css" rel="stylesheet">
+        <!-- Toastr -->
+        <link rel="stylesheet" href="./vendor/toastr/css/toastr.min.css">
     <!-- <style>
         body {
             font-family: Arial, sans-serif;
@@ -457,15 +459,13 @@ input[type="number"] {
                                             <div class="form-group col-md-6">
                                                 <label>发车时间</label>
                                                 <div class="input-group clockpicker">
-                                                    <input id="startTime" required="true" type="text" class="form-control" value="08:00"> <span class="input-group-append"><span class="input-group-text"><i
-                                                                class="fa fa-clock-o"></i></span></span>
+                                                    <input id="startTime" required="true" type="time" class="form-control" value="08:00"> 
                                                 </div>
                                             </div>
                                             <div class="form-group col-md-6">
                                                 <label>休车时间</label>
                                                 <div class="input-group clockpicker">
-                                                    <input id="endTime" required="true" type="text" class="form-control" value="10:30"> <span class="input-group-append"><span class="input-group-text"><i
-                                                                class="fa fa-clock-o"></i></span></span>
+                                                    <input id="endTime" required="true" type="time" class="form-control" value="22:30">
                                                 </div>
                                             </div>
                                             <div class="form-group col-md-6">
@@ -479,29 +479,6 @@ input[type="number"] {
                                                 <textarea id="Description" class="form-control" rows="4" id="comment" required="true" placeholder="请输入线路描述"></textarea>
                                             </div>
                                         </div>
-                                        <!-- <div class="form-row">
-                                            <div class="form-group col-md-4">
-                                                <label>State</label>
-                                                <select id="inputState" class="form-control">
-                                                    <option selected>Choose...</option>
-                                                    <option>Option 1</option>
-                                                    <option>Option 2</option>
-                                                    <option>Option 3</option>
-                                                </select>
-                                            </div>
-                                            <div class="form-group col-md-2">
-                                                <label>Zip</label>
-                                                <input type="text" class="form-control">
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox">
-                                                <label class="form-check-label">
-                                                    Check me out
-                                                </label>
-                                            </div>
-                                        </div> -->
                                         <button  id="nextBtn" class="btn btn-primary" >下一步</button>
                                     </form>
                                 </div>
@@ -517,6 +494,7 @@ input[type="number"] {
                     <div class="col-sm-9" >
                         <div class="card">
                             <div class="card-header">
+                                <button id="previousBtn" class="btn btn-primary" onclick="returnPart1()">返回</button>    
                                 <h4 class="card-title">选择沿途站点</h4>
                             </div>
                             <div class="card-body">
@@ -551,7 +529,8 @@ input[type="number"] {
                                     </ul>
                                 </div>
                                 
-                                <button id="submitBtn" class="btn btn-secondary">提交</button>             
+                                <button id="submitBtn" class="btn btn-secondary" onclick="addBusline()">提交</button>  
+                                <button id="testBtn" class="btn btn-secondary" onclick="Test()" style="color: greenyellow;">Test</button>            
                              </div>
 
                         </div>
@@ -609,10 +588,16 @@ input[type="number"] {
     const SHOW = myDiv2.style.display;
     myDiv2.style.display = 'none';
     myDiv1.style.display = SHOW;
-    let lineInfo = {};
     let Stations = {};
     let lineInfo_ifEmpty = true;
     let lineNumberValid;
+    let lineNumberRecord;
+    let lineID;
+
+function returnPart1(){
+    myDiv1.style.display = SHOW;
+    myDiv2.style.display = 'none';
+}
 
 //check if busLine number is used or not:
 function checkBusline() {
@@ -644,17 +629,100 @@ function checkBusline() {
                     resultDiv.style.display = 'block';
                 });
         }
+
+
+async function addStationSequence(id, order, lineNumber) {
+    const Id = id;
+    const Order = order;
+    const LineNumber = lineNumber;
+    const csrfToken = await getCsrfToken();
+    const response = fetch('http://127.0.0.1:8000/catalog/api/station_sequence/create',{
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken // 添加 CSRF 令牌
+        },
+        body: JSON.stringify({
+                busline: LineNumber,
+                station: Id,
+                order: Order
+            }),
+    })
+    .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            Swal.fire({ icon: 'success', title: '成功!', text: '已创建站点顺序' });
+        })
+        .catch((error) => {
+            Swal.fire({ icon: 'error', title: '错误!', text: error });
+        });
+}
+
+//submit the final information:
+async function addBusline() {
+    const inputData = {
+        lineNumber: document.getElementById('lineNumber').value,
+        status: 'b',
+        startTime: document.getElementById('startTime').value,
+        endTime: document.getElementById('endTime').value,
+        Price: document.getElementById('Price').value,
+        description: document.getElementById('Description').value,
+    }
+
+    const csrfToken = await getCsrfToken();
+    const response = await fetch('http://127.0.0.1:8000/catalog/api/busline/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken // 添加 CSRF 令牌
+        },
+        body: JSON.stringify(inputData),
+    })
+    .then(response => {
+                if (!response.ok) {
+                    throw new Error('网络错误或输入无效');
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert("succeeded");
+            })
+            .catch(error => {
+                alert("failed");
+            });
+       
+        const response2 = await fetch('http://127.0.0.1:8000/catalog/api/busline/get/${lineNumber}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken // 添加 CSRF 令牌
+        },
+        body: JSON.stringify(inputData),
+    })
+    .then(response2 => {
+                if (!response.ok) {
+                    throw new Error('网络错误或输入无效');
+                }
+                return response2.json();
+            })
+            .then(data => {
+                alert("succeeded");
+            })
+            .catch(error => {
+                alert("failed");
+            });
+       
+    addAllStationSequence();
+}
     
-//nextBtn
+//nextBtn:
 document.getElementById('nextBtn').addEventListener('click', function(event) {
     event.preventDefault();
     // 收集表单数据
-    // const lineNumber = document.getElementById('lineNumber').value;
-    // const startTime = document.getElementById('startTime').value;
-    // const endTime = document.getElementById('endTime').value;
-    // const price = document.getElementById('Price').value;
-    // const description = document.getElementById('Description').value;
-        // 收集表单数据
     const lineNumber = document.getElementById('lineNumber').value.trim();  // 去除空格
     const startTime = document.getElementById('startTime').value.trim();
     const endTime = document.getElementById('endTime').value.trim();
@@ -668,17 +736,8 @@ document.getElementById('nextBtn').addEventListener('click', function(event) {
         noneEmpty = false;
     }
 
-
-    // 可选：在此处添加代码将数据保存到服务器或本地存储
     if(noneEmpty&&lineNumberValid){
-    // 创建一个对象存储数据
-    lineInfo = {
-        lineNumber: lineNumber,
-        startTime: startTime,
-        endTime: endTime,
-        price: price,
-        description: description,
-    };
+    lineNumberRecord = lineNumber;
     lineInfo_ifEmpty = false;
     myDiv1.style.display = 'none';
     myDiv2.style.display = SHOW;
@@ -686,45 +745,41 @@ document.getElementById('nextBtn').addEventListener('click', function(event) {
     }
 });
 
+function Test(){
+    // 获取所有的timeline-panel元素
+const timelinePanels = document.querySelectorAll('.timeline-panel.text-muted');
+// 创建一个数组来存储信息
+const stationNames = [];
 
-//submit data:
-const submitBtn = document.getElementById('submitBtn');
+// 遍历每个元素并将其信息添加到数组中
+timelinePanels.forEach(panel => {
+    stationNames.push(panel.innerText);
+});
 
-// submitBtn.addEventListener('click', async function(event) {
-//     event.preventDefault(); 
+alert(stationNames.join(', '));
+}
 
-//     // 获取所有的timeline-panel元素
-//     const timelinePanels = document.querySelectorAll('.timeline-panel.text-muted');
-//     // 创建一个数组来存储信息
-//     const stationNames = [];
+async function addAllStationSequence(){
+// 获取所有的timeline-panel元素
+const timelinePanels = document.querySelectorAll('.timeline-panel.text-muted');
+// 创建一个数组来存储信息
+const stationNames = [];
 
-//     // 遍历每个元素并将其信息添加到数组中
-//     timelinePanels.forEach(panel => {
-//         stationNames.push(panel.innerText);
-//     });
+// 遍历每个元素并将其信息添加到数组中
+timelinePanels.forEach(panel => {
+    stationNames.push(panel.innerText);
+});
 
-//     // 使用join方法将数组转换为字符串，并显示在alert中
-//     alert(stationNames.join(', '));
+stationNames.forEach(async (item,index)=>{
+    const id = Stations[item].id;
+    const order = index;
+    //await addStationSequence(id,order,lineNumberRecord);
+    alert(`(sName:${item},id:${id},order:${index},busLine:${lineNumberRecord})`)
+});
 
-//     const csrfToken = await getCsrfToken();
-//     if(!lineInfo_ifEmpty){
-//     const response = await fetch('http://127.0.0.1:8000/catalog/api/busline/add', {
-//         method: 'PATCH',
-//         headers: {
-//             'Content-Type': 'application/json',
-//             'X-CSRFToken': csrfToken // 添加 CSRF 令牌
-//         },
-//         body: JSON.stringify({
-//             status: 'b',
-//             startTime: lineInfo.startTime,
-//             endTime: lineInfo.endTime,
-//             lineNumber: lineInfo.lineNumber,
-//             Price: lineInfo.price,
-//             description: lineInfo.description,
-//         })
-//     });
-// }
-// });
+// // 使用join方法将数组转换为字符串，并显示在alert中
+// alert(stationNames.join(', '));
+}
 
 
 // 状态映射
@@ -740,13 +795,6 @@ const statusClassMapping = {
     'o': 'badge badge-success',
     'b': 'badge badge-primary'
 };
-
-    // 获取CSRF令牌
-async function getCsrfToken() {
-    const response = await fetch('http://127.0.0.1:8000/catalog/api/get-csrf-token/');
-    const data = await response.json();
-    return data.csrfToken; // 根据响应结构调整
-    }
 
 // 获取所有站点信息
 async function fetchStations() {
@@ -769,6 +817,12 @@ async function fetchStations() {
 }
 //window.onload = fetchStations();
 
+// 获取CSRF令牌
+async function getCsrfToken() {
+    const response = await fetch('http://127.0.0.1:8000/catalog/api/get-csrf-token/');
+    const data = await response.json();
+    return data.csrfToken; // 根据响应结构调整
+}
 
 //显示站点信息
 function displayStations(stations) {
@@ -804,7 +858,7 @@ function displayStations(stations) {
     
  }
  
-
+//拖动显示功能
  function updateSelectedStations() {
         let draggedItem = null;
              const divBody = document.getElementById('selected_Stations');
@@ -862,7 +916,6 @@ stops.forEach(stop => {
         }
 
 
-
 </script>
 
 
@@ -902,6 +955,12 @@ stops.forEach(stop => {
         <!-- Datatable -->
         <script src="./vendor/datatables/js/jquery.dataTables.min.js"></script>
         <script src="./js/plugins-init/datatables.init.js"></script>
+
+            <!-- Toastr -->
+    <script src="./vendor/toastr/js/toastr.min.js"></script>
+
+    <!-- All init script -->
+    <script src="./js/plugins-init/toastr-init.js"></script>
 
 
 

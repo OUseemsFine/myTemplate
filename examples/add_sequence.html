@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Station Sequence API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        form, .station-list {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background: #e9ecef;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Create Station Sequence</h1>
+<form id="stationSequenceForm">
+    <label for="busline">Busline Number:</label>
+    <input type="number" id="busline" required>
+
+    <label for="station">Station ID:</label>
+    <input type="number" id="station" required>
+
+    <label for="order">Order:</label>
+    <input type="number" id="order" required>
+
+    <button type="submit">Create Station Sequence</button>
+</form>
+
+<div class="response" id="response" style="display:none;"></div>
+
+<h2>Station List</h2>
+<button id="fetchStationsButton">Fetch Stations</button>
+<div id="stationListContainer" class="station-list" style="display:none;">
+    <table id="stationList">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Other Info</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('stationSequenceForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const busline = document.getElementById('busline').value;
+        const station = document.getElementById('station').value;
+        const order = document.getElementById('order').value;
+        const csrfToken = await getCsrfToken(); // 获取CSRF令牌
+
+        fetch('http://127.0.0.1:8000/catalog/api/station_sequence/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                busline: busline,
+                station: station,
+                order: order
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const responseDiv = document.getElementById('response');
+            responseDiv.style.display = 'block';
+            responseDiv.innerHTML = 'Success: ' + JSON.stringify(data);
+            Swal.fire({ icon: 'success', title: '成功!', text: '已创建站点顺序' });
+        })
+        .catch((error) => {
+            const responseDiv = document.getElementById('response');
+            responseDiv.style.display = 'block';
+            responseDiv.innerHTML = 'Error: ' + error;
+            Swal.fire({ icon: 'error', title: '错误!', text: error });
+        });
+    });
+
+    document.getElementById('fetchStationsButton').addEventListener('click', async function() {
+        const csrfToken = await getCsrfToken(); // 获取CSRF令牌
+        const response = await fetch('http://127.0.0.1:8000/catalog/api/stations/list', {
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        });
+
+        if (response.ok) {
+            const stations = await response.json();
+            displayStations(stations); // 显示站点信息表格
+            Swal.fire({ icon: 'success', title: '成功!', text: '已加载站点信息' });
+        } else {
+            const errorData = await response.json();
+            Swal.fire({ icon: 'error', title: '错误!', text: errorData.detail || '获取站点信息失败。' });
+        }
+    });
+
+    function displayStations(stations) {
+        const tbody = document.querySelector('#stationList tbody');
+        tbody.innerHTML = ''; // 清空现有行
+        stations.forEach(station => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${station.id}</td>
+                <td>${station.name}</td>
+                <td>${station.otherInfo || 'N/A'}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        document.getElementById('stationListContainer').style.display = 'block';
+    }
+
+    async function getCsrfToken() {
+        const response = await fetch('http://127.0.0.1:8000/catalog/api/get-csrf-token/');
+        const data = await response.json();
+        return data.csrfToken; // 根据响应结构调整
+    }
+</script>
+
+</body>
+</html>
