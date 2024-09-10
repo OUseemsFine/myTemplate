@@ -18,7 +18,7 @@
         <link href="./vendor/datatables/css/jquery.dataTables.min.css" rel="stylesheet">
             <!-- Custom Stylesheet -->
         <link href="./css/style.css" rel="stylesheet">
-        <style>
+        <!-- <style>
 /* check busLine number if_validate style */
 input[type="number"] {
             padding: 10px;
@@ -83,25 +83,7 @@ input[type="number"] {
                 background-color: gray;
                 color: violet;
             }
-        </style>
-    <!-- <style>
-        .highlight {
-            font-size: 32px;
-            color: orange; /* 已标亮颜色 */
-        }
-        .bus-icon {
-            font-size: 32px;
-            color: green; /* 未标亮颜色 */
-        }
-        .bus-maintain {
-            font-size: 32px;
-            color: grey;
-        }
-        .bus-build {
-            font-size: 32px;
-            color: blueviolet;
-        }
-    </style>  -->
+        </style> -->
 
     <!--style of this page-->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
@@ -307,8 +289,8 @@ input[type="number"] {
                                 class="icon icon-plug"></i><span class="nav-text">站点</span></a>
                         <ul aria-expanded="false">
                             <li><a href="./uc-select2.html">站点数据</a></li>
-                            <li><a href="./station_add.html">添加站点</a></li>
-                            <li><a href="./station_manage.html">管理站点</a></li>
+                            <li><a href="./busline_add.html">添加站点</a></li>
+                            <li><a href="./busline_manage.html">管理站点</a></li>
                         </ul>
                     </li>
 
@@ -359,158 +341,117 @@ input[type="number"] {
                 <div class="row page-titles mx-0">
                     <div class="col-sm-6 p-md-0">
                         <div class="welcome-text">
-                            <h4>添加线路</h4>
-                            <span class="ml-1">输入线路信息</span>
+                            <h4>Hi, welcome back!</h4>
+                            <span class="ml-1">Datatable</span>
                         </div>
                     </div>
                     <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="javascript:void(0)">线路</a></li>
-                            <li class="breadcrumb-item active"><a href="javascript:void(0)">添加线路</a></li>
+                            <li class="breadcrumb-item"><a href="javascript:void(0)">Table</a></li>
+                            <li class="breadcrumb-item active"><a href="javascript:void(0)">Datatable</a></li>
                         </ol>
                     </div>
                 </div>
                 <!-- row -->
 
-                
 
-                <div class="row" id="part-1" style="display: none;">
-                    <div class="col-sm-12">
-                        <div id="card-1" class="card">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="card" style="height: 800px;">
                             <div class="card-header">
-                                <h4 class="card-title">基本信息</h4>
-                            </div>
-                            <div class="card-body">
-                                <div class="basic-form">
-                                    <form>
-
-                                        <div class="form-row">
-                                            <div class="form-group col-md-6">
-                                                <label for="lineNumber">线路号</label>
-                                                <input oninput="checkBusline()" id="lineNumber" type="number" class="form-control" placeholder="请输入线路号" required="true">
-                                                <div id="result" class="message" style="display:none;"></div>
-                                            </div>
-                                            <div class="form-group col-md-6">
-                                            </div>
-                                            <div class="form-group col-md-6">
-                                                <label for="startTime">发车时间</label>
-                                                <div class="input-group clockpicker">
-                                                    <input id="startTime" required="true" type="time" class="form-control" value="08:00"> 
-                                                </div>
-                                            </div>
-                                            <div class="form-group col-md-6">
-                                                <label for="endTime">休车时间</label>
-                                                <div class="input-group clockpicker">
-                                                    <input id="endTime" required="true" type="time" class="form-control" value="22:30">
-                                                </div>
-                                            </div>
-                                            <div class="form-group col-md-6">
-                                                <label for="Price">票价</label>
-                                                <input id="Price" type="number" step="0.01" 
-                                                oninput="this.value = parseFloat(this.value).toFixed(2) || ''" 
-                                                class="form-control" placeholder="请输入票价" required="true">
-                                            </div>
-                                            <div class="form-group col-md-6">
-                                            </div>
-                                            <div class="form-group col-md-6">
-                                                <label for="Description">描述</label>
-                                                <textarea id="Description" class="form-control" rows="4" id="comment" required="true" placeholder="请输入线路描述"></textarea>
-                                            </div>
-                                        </div>
-                                        <button  id="nextBtn" class="btn btn-primary" >下一步</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                
-
-                <div class="row" id="part-2">
-                    
-                    <div class="col-md-9" >
-                        <div class="card">
-                            <div class="card-header">
-                                <button id="previousBtn" class="btn btn-primary" onclick="returnPart1()">返回</button>    
-                                <h4 class="card-title">选择沿途站点</h4>
+                                <h4 class="card-title">Datatable</h4>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    
-                                    <!-- <table id="example" class="display" style="min-width: 845px"> -->
-                                    <table id="example" class="display" >
+                                    <table id="example2" class="display" style="width:100%;">
                                         <thead>
                                             <tr>
-                                                <th>站名</th>
-                                                <th>区域</th>
+                                                <th>线路号</th>                       
+                                                <th>站点数量</th>
+                                                <th>车辆数量</th>
                                                 <th>状态</th>
-                                                <th>位置</th>
+                                                <th>操作</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="station-table"></tbody>
+                                        <tbody id="line-table">
+                                        </tbody> 
                                     </table>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-
-                    <div class="col-md-3">
-                        <div class="card">
+                    <div class="col-6">
+                        <div class="card" >
                             <div class="card-header">
-                                <h4 class="card-title">已添加站点</h4>
-                                <span><p>拖动以更改顺序</p></span>
-                             </div>
-                             <div class="card-body">
-                                <div class="widget-timeline">
-                                    <ul class="timeline" id="selected_Stations">
-                                    </ul>
-                                </div>
-                                
-                                <button id="submitBtn" class="btn btn-secondary" onclick="addBusline()">提交</button>  
-                                <!-- <button id="testBtn" class="btn btn-secondary" onclick="Test()" style="color: greenyellow;">Test</button>             -->
-                             </div>
-
-                        </div>
-                    </div>  
-
-                    
-                
-                    <div class="col-xl-6 col-xxl-6 col-sm-6">
-                        <div class="card">
-                            <div class="card-header">
-                               <h4 class="card-title">地图</h4>
+                                <h4 class="card-title">线路信息</h4>
                             </div>
                             <div class="card-body">
-
-                                <table id="stationTable">
-                                    <thead>
-                                        <tr>
-                                            <th>站点名字</th>
-                                            <th>地点</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="stationBody">
-                                        <!-- 站点信息将通过 JavaScript 动态生成 -->
-                                    </tbody>
-                                    
-                                </table>
-                                <div></div>
-                                <div class="pagination" id="pagination"></div>
-                            
-                                <!-- <div class="selected-stations" id="selectedStations"></div>
-                            
-                                <button id="submitBtn">提交</button> -->
-
+                                <div id="busline-detail">
+                                     <form id="updateForm">
+                                         <div class="form-group">
+                                             <label for="lineNumber">线路号</label>
+                                             <input readonly required style="background-color: #f0f0f0;" 
+                                             type="text" class="form-control" id="lineNumber" placeholder="请选择一条线路" required="true">
+                                         </div>
+                                         <div class="form-group">
+                                             <label for="status">状态</label>
+                                             <select class="form-control" id="status" required="true">
+                                                 <option value="m">维护中</option>
+                                                 <option value="o">运营中</option>
+                                                 <option value="b">建设中</option>
+                                             </select>
+                                         </div>
+                                         <div class="form-group">
+                                             <label for="startTime">发车时间</label>
+                                             <input type="time" class="form-control" id="startTime" required="true">
+                                         </div>
+                                         <div class="form-group">
+                                             <label for="endTime">休车时间</label>
+                                             <input type="time" class="form-control" id="endTime" required="true">
+                                         </div>
+                                         <div class="form-group">
+                                            <label for="Price">票价</label>
+                                            <input type="number" step="0.01" 
+                                            oninput="this.value = parseFloat(this.value).toFixed(2) || ''" 
+                                            class="form-control" id="Price" required="true">
+                                        </div>
+                                         <div class="form-group">
+                                            <label for="description">描述</label>
+                                            <textarea id="description" class="form-control" rows="4" required="true"></textarea>
+                                        </div>
+                                         <button type="button" class="btn btn-success" id="updateButton">更新</button>
+                                         <button type="button" class="btn btn-danger" id="deleteButton">删除</button>
+                                     </form>                                   
+                                 </div>
                             </div>
                         </div>
                     </div>
 
-                            
+
+                    <div class="col-9">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">地图信息</h4>
+                            </div>
+                            <div class="card-body">
+        
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-3">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">沿线站点</h4>
+                            </div>
+                            <div class="card-body">
+        
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
-                
-            
             </div>
         </div>
         <!--**********************************
@@ -521,220 +462,8 @@ input[type="number"] {
         Scripts
     ***********************************-->
     <script>
-    window.onload = fetchStations();
-    const myDiv1 = document.getElementById('part-1');
-    const myDiv2 = document.getElementById('part-2');
-    const SHOW = myDiv2.style.display;
-    myDiv2.style.display = 'none';
-    myDiv1.style.display = SHOW;
-    let Stations = {};
-    let lineInfo_ifEmpty = true;
-    let lineNumberValid;
-    let lineNumberRecord;
-    let lineID;
 
-function returnPart1(){
-    myDiv1.style.display = SHOW;
-    myDiv2.style.display = 'none';
-}
-
-//check if busLine number is used or not:
-function checkBusline() {
-            const lineNumber = document.getElementById('lineNumber').value;
-            const resultDiv = document.getElementById('result');
-
-            if (!lineNumber) {
-                resultDiv.style.display = 'none';
-                return;
-            }
-
-            fetch(`http://127.0.0.1:8000/catalog/api/busline/exist/${lineNumber}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.exists) {
-                        resultDiv.className = 'message exists';
-                        resultDiv.textContent = '该公交线路已存在！';
-                        lineNumberValid = false;
-                    } else {
-                        resultDiv.className = 'message not-exists';
-                        resultDiv.textContent = '该公交线路可用！';
-                        lineNumberValid = true;
-                    }
-                    resultDiv.style.display = 'block';
-                })
-                .catch(error => {
-                    resultDiv.className = 'message exists';
-                    resultDiv.textContent = '检查线路时发生错误！';
-                    resultDiv.style.display = 'block';
-                });
-        }
-
-
-async function addStationSequence(id, order, lineNumber) {
-    const Id = id;
-    const Order = order;
-    const LineNumber = lineNumber;
-    const csrfToken = await getCsrfToken();
-    const response = fetch('http://127.0.0.1:8000/catalog/api/stationSequence/add',{
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken // 添加 CSRF 令牌
-        },
-        body: JSON.stringify({
-                busline: lineID,
-                station: Id,
-                order: Order
-            }),
-    })
-    .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to add station sequence');
-            }
-            return response.json();
-        })
-        .then(data => {
-            //Swal.fire({ icon: 'success', title: '成功!', text: `one station sequence:${lineID,Id,Order} has been added` });
-        })
-        .catch((error) => {
-            //Swal.fire({ icon: 'error', title: '错误!', text: error });
-        });
-}
-
-let buslineInfo;
-//create a bus-line in database:
-async function addBusline() {
-    // 获取所有的timeline-panel元素
-const timelinePanels = document.querySelectorAll('.timeline-panel.text-muted');
-// 创建一个数组来存储信息
-const stationNames = [];
-
-// 遍历每个元素并将其信息添加到数组中
-timelinePanels.forEach(panel => {
-    stationNames.push(panel.innerText);
-});
-    if(stationNames.length === 0){
-    Swal.fire({ icon: 'warning', title: '警告', text: '尚未添加任何站点' });
-    return ;
-    }
-
-    const inputData = {
-        lineNumber: document.getElementById('lineNumber').value,
-        status: 'b',
-        startTime: document.getElementById('startTime').value,
-        endTime: document.getElementById('endTime').value,
-        Price: document.getElementById('Price').value,
-        description: document.getElementById('Description').value,
-    }
-
-    const csrfToken = await getCsrfToken();
-    const response = await fetch('http://127.0.0.1:8000/catalog/api/busline/add', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken // 添加 CSRF 令牌
-        },
-        body: JSON.stringify(inputData),
-    })
-    .then(response => {
-                if (!response.ok) {
-                    throw new Error('网络错误或输入无效');
-                }
-                return response.json();
-            })
-            .then(data => {
-                //Swal.fire({ icon: 'success', title: '成功！', text: '线路已上传' });
-            })
-            .catch(error => {
-                Swal.fire({ icon: 'error', title: '失败！', text: 'cannot post data' });
-            });
-       
-        const response2 = await fetch(`http://127.0.0.1:8000/catalog/api/busline/get/${inputData.lineNumber}`, {
-        headers: {
-            'X-CSRFToken': csrfToken // 添加 CSRF 令牌
-        },     
-    })
-    
-    if(response2.ok){
-        buslineInfo = await response2.json();
-        lineID = buslineInfo.id;
-        //Swal.fire({ icon: 'success', title: '成功!', text: `bus-line ${buslineInfo.lineNumber}'s id(${buslineInfo.id}) fetched` });
-    }else{
-        Swal.fire({ icon: 'error', title: '错误!', text: 'failed to fetch bus-line id' });
-    }
-       
-    addAllStationSequence();
-    Swal.fire({ icon: 'success', title: '成功！', text: '线路已上传' });
-    location.reload();
-}
-    
-//nextBtn:
-document.getElementById('nextBtn').addEventListener('click', function(event) {
-    event.preventDefault();
-    // 收集表单数据
-    const lineNumber = document.getElementById('lineNumber').value.trim();  // 去除空格
-    const startTime = document.getElementById('startTime').value.trim();
-    const endTime = document.getElementById('endTime').value.trim();
-    const price = document.getElementById('Price').value.trim();
-    const description = document.getElementById('Description').value.trim();
-    let noneEmpty = true;
-
-    // 验证每一项不能为空
-    if (!lineNumber || !startTime || !endTime || !price || !description) {
-        alert('所有字段都必须填写！');
-        noneEmpty = false;
-    }
-
-    if(noneEmpty&&lineNumberValid){
-    lineNumberRecord = lineNumber;
-    lineInfo_ifEmpty = false;
-    myDiv1.style.display = 'none';
-    myDiv2.style.display = SHOW;
-    Swal.fire({ icon: 'success', title: '成功!', text: '信息已保存' });
-    }
-});
-
-// function Test(){
-//     // 获取所有的timeline-panel元素
-// const timelinePanels = document.querySelectorAll('.timeline-panel.text-muted');
-// // 创建一个数组来存储信息
-// const stationNames = [];
-
-// // 遍历每个元素并将其信息添加到数组中
-// timelinePanels.forEach(panel => {
-//     stationNames.push(panel.innerText);
-// });
-
-// alert(stationNames.join(', '));
-// }
-
-async function addAllStationSequence(){
-// 获取所有的timeline-panel元素
-const timelinePanels = document.querySelectorAll('.timeline-panel.text-muted');
-// 创建一个数组来存储信息
-const stationNames = [];
-
-// 遍历每个元素并将其信息添加到数组中
-timelinePanels.forEach(panel => {
-    stationNames.push(panel.innerText);
-});
-
-
-    //Swal.fire({ icon: 'warning', title: '警告', text: '尚未添加任何站点' });
-
-stationNames.forEach(async (item,index)=>{
-    const id = Stations[item].id;
-    const order = index;
-    await addStationSequence(id,order,lineNumberRecord);
-    //alert(`(sName:${item},id:${id},order:${index},busLine:${lineNumberRecord})`)
-});
-}
-
-
-// // 使用join方法将数组转换为字符串，并显示在alert中
-// alert(stationNames.join(', '));
-
-
+window.onload = fetchBuslines();
 
 // 状态映射
 const statusMapping = {
@@ -750,27 +479,6 @@ const statusClassMapping = {
     'b': 'badge badge-primary'
 };
 
-// 获取所有站点信息
-async function fetchStations() {
-    const csrfToken = await getCsrfToken(); // 获取CSRF令牌
-    const response = await fetch('http://127.0.0.1:8000/catalog/api/stations/list', {
-        headers: {
-            'X-CSRFToken': csrfToken
-        }
-    });
-
-    if (response.ok) {
-        const stations = await response.json();
-        //loadStationsOnMap(stations); // 加载站点到地图
-        displayStations(stations); // 显示站点信息表格
-        //Swal.fire({ icon: 'success', title: '成功!', text: '加载完成' });
-    } else {
-        const errorData = await response.json();
-        //Swal.fire({ icon: 'error', title: '错误!', text: errorData.detail || '获取站点信息失败。' });
-    }
-}
-//window.onload = fetchStations();
-
 // 获取CSRF令牌
 async function getCsrfToken() {
     const response = await fetch('http://127.0.0.1:8000/catalog/api/get-csrf-token/');
@@ -778,107 +486,69 @@ async function getCsrfToken() {
     return data.csrfToken; // 根据响应结构调整
 }
 
-//显示站点信息
-function displayStations(stations) {
-    const tableBody = document.getElementById('station-table');
+// 获取所有站点信息
+async function fetchBuslines() {
+    const csrfToken = await getCsrfToken(); // 获取CSRF令牌
+    const response = await fetch('http://127.0.0.1:8000/catalog/api/busline/get/all', {
+        headers: {
+            'X-CSRFToken': csrfToken
+        }
+    });
+
+    if (response.ok) {
+        const busLines = await response.json();
+        //loadStationsOnMap(buslines); // 加载站点到地图
+        load_lineTable(busLines); // 显示站点信息表格
+        Swal.fire({ icon: 'success', title: '成功!', text: '加载完成' });
+    } else {
+        const errorData = await response.json();
+        //Swal.fire({ icon: 'error', title: '错误!', text: errorData.detail || '获取站点信息失败。' });
+    }
+}
+
+function load_lineTable(Buslines) {
+    const tableBody = document.getElementById('line-table');
     tableBody.innerHTML = ''; // 清空之前的内容
 
-    stations.forEach(station => {
+    Buslines.forEach(busline => {
+        // const personInfo = JSON.stringify(busline, null, 2);
+        // alert(personInfo);
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${station.sName}</td>
-            <td>${station.id}</td>
-            <td><span class="${statusClassMapping[station.status] || ''}">${statusMapping[station.status] || '未知状态'}</span></td>
-            <td>${station.latitude}, ${station.longitude}</td>
+            <td style="color: purple;">${busline.lineNumber}</td>
+            <td style="color: blue;">${1}</td>
+            <td style="color: blue;">${1}</td>
+            <td><span class="${statusClassMapping[busline.status] || ''}">${statusMapping[busline.status] || '未知状态'}</span></td>
+            <td>
+                <button class="btn btn-info" 
+                onclick="manageBusline(
+                ${busline.id},
+                ${busline.lineNumber},
+                '${busline.startTime}',
+                '${busline.endTime}',
+                ${busline.Price},
+                '${busline.description}',
+                '${busline.status}',
+                )">
+                选择</button>
+            </td>
         `;
-        row.addEventListener('click',()=>{
-            if (row.classList.contains(`${station.sName}`)) {
-                row.classList.remove(`${station.sName}`);
-                delete Stations[station.sName];
-            }else{
-                row.classList.toggle(`${station.sName}`);
-                Stations[station.sName] = station;
-            }
-            // if (row.classList.contains(`${station.id}`)) {
-            //     alert('选中的行: ' +(station.id in Stations)+ Stations[station.id].sName);
-            // }else{
-            //     alert('移除的行: ' + (station.id in Stations));
-            // }
-            updateSelectedStations();
-        });
 
         tableBody.appendChild(row);
     });
+}
+
+function manageBusline(id,lineNumber,startTime,endTime,Price,description,status){ 
+    document.getElementById('lineNumber').value = lineNumber;
+    document.getElementById('startTime').value = startTime;
+    document.getElementById('endTime').value = endTime;
+    document.getElementById('Price').value = Price;
+    document.getElementById('description').value = description;
+    document.getElementById('status').value = status
+}
     
- }
- 
-//拖动显示功能
- function updateSelectedStations() {
-        let draggedItem = null;
-             const divBody = document.getElementById('selected_Stations');
-             divBody.innerHTML = ``;
-            //selectedStationsContainer.innerHTML = '';
-            Object.values(Stations).forEach(station => {
-                const draggableStop = document.createElement('li');
-                draggableStop.className = `drag`;
-                draggableStop.innerHTML = `
-                <div class="timeline-badge primary"></div>
-                <div class="timeline-panel text-muted"  draggable="true" id="${station.sName}">${station.sName}</div>
-                `;
-                divBody.appendChild(draggableStop);
-  
-            });
-
-             // 添加拖动事件
-const stops = divBody.querySelectorAll('.drag'); // 查询 divBody 中的所有 stop
-
-stops.forEach(stop => {
-    stop.addEventListener('dragstart', () => {
-        draggedItem = stop;
-        setTimeout(() => {
-            stop.style.display = 'none';
-        }, 0);
-    });
-
-    stop.addEventListener('dragend', () => {
-        setTimeout(() => {
-            draggedItem = null;
-            stop.style.display = 'block';
-        }, 0);
-    });
-
-    stop.addEventListener('dragover', (event) => {
-        event.preventDefault();
-    });
-
-    stop.addEventListener('drop', () => {
-        if (draggedItem !== stop) {
-            const allStops = Array.from(divBody.querySelectorAll('.stop'));
-            const draggedIndex = allStops.indexOf(draggedItem);
-            const targetIndex = allStops.indexOf(stop);
-
-            if (draggedIndex < targetIndex) {
-                stop.after(draggedItem);
-            } else {
-                stop.before(draggedItem);
-            }
-        }
-        
-    });
-});
-
-        }
-
-
-
-
-
-
-</script>
-
-
-
-
+    </script>
+    
     <!-- Required vendors -->
     <script src="./vendor/global/global.min.js"></script>
     <script src="./js/quixnav-init.js"></script>
@@ -913,14 +583,6 @@ stops.forEach(stop => {
         <!-- Datatable -->
         <script src="./vendor/datatables/js/jquery.dataTables.min.js"></script>
         <script src="./js/plugins-init/datatables.init.js"></script>
-
-            <!-- Toastr -->
-    <script src="./vendor/toastr/js/toastr.min.js"></script>
-
-    <!-- All init script -->
-    <script src="./js/plugins-init/toastr-init.js"></script>
-
-
 
         
 
