@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="./vendor/owl-carousel/css/owl.theme.default.min.css">
     <link href="./vendor/jqvmap/css/jqvmap.min.css" rel="stylesheet">
     <link href="./css/style.css" rel="stylesheet">   
+    <!-- <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" /> -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"> -->
         <!-- Datatable -->
@@ -88,10 +89,29 @@ input[type="number"] {
     <!--style of this page-->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
+        .drag{
+            color: aqua;
+        }
+        .highlight{
+            font-size: 32px;
+            color:orange;
+        }
+        .bus-icon{
+            font-size: 32px;
+            color: green;
+        }
+        .bus-icon-building{
+            font-size: 32px;
+            color: purple;
+        }
+        .bus-icon-maintaining{
+            font-size: 32px;
+            color: red;
+        }
         #map {
-            height: 300px; /* 地图高度 */
+            height: 600px; /* 地图高度 */
             width: 100%; /* 地图宽度 */
-            margin-top: 20px; /* 与表单的间距 */
+            margin-right: 20px; /* 与表单的间距 */
         }
     </style>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -356,13 +376,22 @@ input[type="number"] {
 
 
                 <div class="row">
-                    <div class="col-6">
+                    <div class="col-7">
                         <div class="card" style="height: 800px;">
                             <div class="card-header">
-                                <h4 class="card-title">Datatable</h4>
+                                <h4 class="card-title" id="buslineTitle" style="display: none;">线路数据表</h4>
+                                <h4 class="card-title" id="stationTitle">站点数据表</h4>
+                                <button class="btn btn-secondary badge-rounded" id="switchBtn" onclick="reload()">
+                                    刷新
+                                </button>
+                                <script>
+                                    function reload(){
+                                        location.reload();
+                                    }
+                                </script>
                             </div>
                             <div class="card-body">
-                                <div class="table-responsive">
+                                <div class="table-responsive" id="buslineDataTable">
                                     <table id="example2" class="display" style="width:100%;">
                                         <thead>
                                             <tr>
@@ -377,18 +406,20 @@ input[type="number"] {
                                         </tbody> 
                                     </table>
                                 </div>
+                                <div class="table-datatable-basic" id="stationsDataTable" style="display: none;">
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-6">
-                        <div class="card" >
+                    <div class="col-5">
+                        <div class="card" style="height: 800px;">
                             <div class="card-header">
                                 <h4 class="card-title">线路信息</h4>
                             </div>
                             <div class="card-body">
                                 <div id="busline-detail">
-                                     <form id="updateForm">
+                                     <form id="buslineForm">
                                          <div class="form-group">
                                              <label for="lineNumber">线路号</label>
                                              <input readonly required style="background-color: #f0f0f0;" 
@@ -420,33 +451,40 @@ input[type="number"] {
                                             <label for="description">描述</label>
                                             <textarea id="description" class="form-control" rows="4" required="true"></textarea>
                                         </div>
-                                         <button type="button" class="btn btn-success" id="updateButton">更新</button>
-                                         <button type="button" class="btn btn-danger" id="deleteButton">删除</button>
-                                     </form>                                   
+                                     </form> 
+                                     <form id="stationForm" style="display: none;">
+
+                                     </form>  
+                                     <span class="col-6"><button type="button" class="btn btn-success" id="updateButton">更新</button></span>
+                                     <span class="col-6"><button type="button" class="btn btn-danger" id="deleteButton">删除</button></span>                                
                                  </div>
                             </div>
                         </div>
                     </div>
 
 
-                    <div class="col-9">
+                    <div class="col-8">
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="card-title">地图信息</h4>
                             </div>
                             <div class="card-body">
-        
+                               <div id="map">
+                               </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-3">
+                    <div class="col-4">
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="card-title">沿线站点</h4>
                             </div>
                             <div class="card-body">
-        
+                                <div class="widget-timeline">
+                                    <ul class="timeline" id="stations">
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -462,9 +500,16 @@ input[type="number"] {
         Scripts
     ***********************************-->
     <script>
+let StationList = {};
+let Stations = [];  
+let StationSequences;
 
-window.onload = fetchBuslines();
+window.onload = start();
 
+function start(){
+    fetchBuslines();
+    fetchStations();
+}
 // 状态映射
 const statusMapping = {
     'm': '维护中',
@@ -498,7 +543,7 @@ async function fetchBuslines() {
     if (response.ok) {
         const busLines = await response.json();
         //loadStationsOnMap(buslines); // 加载站点到地图
-        load_lineTable(busLines); // 显示站点信息表格
+        await load_lineTable(busLines); // 显示站点信息表格
         Swal.fire({ icon: 'success', title: '成功!', text: '加载完成' });
     } else {
         const errorData = await response.json();
@@ -538,16 +583,221 @@ function load_lineTable(Buslines) {
     });
 }
 
-function manageBusline(id,lineNumber,startTime,endTime,Price,description,status){ 
+async function manageBusline(id,lineNumber,startTime,endTime,Price,description,status){ 
     document.getElementById('lineNumber').value = lineNumber;
     document.getElementById('startTime').value = startTime;
     document.getElementById('endTime').value = endTime;
     document.getElementById('Price').value = Price;
     document.getElementById('description').value = description;
     document.getElementById('status').value = status
+    await fetchStationSequences(lineNumber);
+    await initializeStationList();
+    await updateSelectedStations();
+
 }
-    
+
+//Map:
+let map; //set the center to Chongqing
+let markers = {};
+const busIcon = L.divIcon({
+    className: 'bus-icon',
+    html: '<i class="fas fa-bus"></i>',
+    iconSize: [32, 32],
+});
+
+const highlightedBusIcon = L.divIcon({
+    className: 'highlight',
+    html: '<i class="fas fa-bus"></i>',
+    iconSize: [32, 32],
+});
+
+const busIcon_building = L.divIcon({
+    className: 'bus-icon-building',
+    html: '<i class="fas fa-bus"></i>',
+    iconSize: [32, 32],
+});
+
+const busIcon_maintaining = L.divIcon({
+    className: 'bus-icon-maintaining',
+    html: '<i class="fas fa-bus"></i>',
+    iconSize: [32, 32],
+});
+
+function setIcon(status){
+    if(status === 'o'){
+        return busIcon;
+        };
+        if(status === 'm'){
+        return busIcon_maintaining;
+        };
+        if(status === 'b'){
+        return busIcon_building;
+        };
+}
+
+function bindPopupContent(station){
+    const content = `
+      <div>
+        站点名: ${station.sName}</br>
+        站点位置(纬度,经度): ${station.latitude}, ${station.longitude}</br>
+      </div>
+    `;
+    return content;
+}
+
+
+function loadStationsOnMap(stations){
+  if(map){
+    map.remove();
+  }
+  map = L.map('map').setView([29.5630,106.5708],12)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+  
+    for(const id in markers){
+        markers[id].remove();
+    }
+    markers = {};
+
+    stations.forEach(station => {
+        const status = station.status;
+        if(status === 'o'){
+        const marker = L.marker([station.latitude,station.longitude],{icon:setIcon(status)})
+        .addTo(map)
+        .bindPopup(bindPopupContent(station));
+        };
+        if(status === 'm'){
+        const marker = L.marker([station.latitude,station.longitude],{icon:setIcon(status)})
+        .addTo(map)
+        .bindPopup(bindPopupContent(station));
+        };
+        if(status === 'b'){
+        const marker = L.marker([station.latitude,station.longitude],{icon:setIcon(status)})
+        .addTo(map)
+        .bindPopup(bindPopupContent(station));
+        };
+
+    });
+}
+
+async function fetchStations() {
+    const csrfToken = await getCsrfToken(); // 获取CSRF令牌
+    const response = await fetch('http://127.0.0.1:8000/catalog/api/stations/list', {
+        headers: {
+            'X-CSRFToken': csrfToken
+        }
+    });
+
+    if (response.ok) {
+        const stations = await response.json();
+        Object.values(stations).forEach(station=>{
+        StationList[station.id] = station;
+    });
+        //initializeStationList(stations);
+        //updateSelectedStations();
+        loadStationsOnMap(stations); // 加载站点到地图
+        //displayStations(stations); // 显示站点信息表格
+        //Swal.fire({ icon: 'success', title: '成功!', text: '站点信息已成功加载。' });
+    } else {
+        const errorData = await response.json();
+        Swal.fire({ icon: 'error', title: '错误!', text: errorData.detail || '获取站点信息失败。' });
+    }
+}
+
+async function fetchStationSequences(lineNumber) {
+    const csrfToken = await getCsrfToken(); // 获取CSRF令牌
+    const response = await fetch(`http://127.0.0.1:8000/catalog/api/stationSequence/fetch/lineNumber/${lineNumber}`, {
+        headers: {
+            'X-CSRFToken': csrfToken
+        }
+    });
+
+    if (response.ok) {
+
+        StationSequences = {};
+        const stationsequences = await response.json();
+        StationSequences = stationsequences;
+        StationSequences.sort((a, b) => a.order - b.order);
+        //alert(JSON.stringify(StationSequences, null, 2));
+    } else {
+        StationSequences = null;
+        // const errorData = await response.json();
+        // Swal.fire({ icon: 'error', title: '错误!', text: errorData.detail || '获取站点信息失败。' });
+    }
+    Swal.fire({ icon: 'success', title: '成功!', text: '站点信息已成功加载。' });
+}
+
+function initializeStationList(){
+    Stations = [];
+    if(StationSequences === null){
+        return ;
+    }
+    Object.values(StationSequences).forEach(station=>{
+        Stations.push(StationList[station.station]);
+    });
+}
+
+//拖动显示功能
+function updateSelectedStations() {
+        let draggedItem = null;
+             const divBody = document.getElementById('stations');
+             divBody.innerHTML = ``;
+            //selectedStationsContainer.innerHTML = '';
+            Object.values(Stations).forEach(station => {
+                const draggableStop = document.createElement('li');
+                draggableStop.className = `drag`;
+                draggableStop.innerHTML = `
+                <div class="timeline-badge primary"></div>
+                <div class="timeline-panel text-muted"  draggable="true" id="${station.sName}">${station.sName}</div>
+                `;
+                divBody.appendChild(draggableStop);
+  
+            });
+
+             // 添加拖动事件
+const stops = divBody.querySelectorAll('.drag'); // 查询 divBody 中的所有 stop
+
+stops.forEach(stop => {
+    stop.addEventListener('dragstart', () => {
+        draggedItem = stop;
+        setTimeout(() => {
+            stop.style.display = 'none';
+        }, 0);
+    });
+
+    stop.addEventListener('dragend', () => {
+        setTimeout(() => {
+            draggedItem = null;
+            stop.style.display = 'block';
+        }, 0);
+    });
+
+    stop.addEventListener('dragover', (event) => {
+        event.preventDefault();
+    });
+
+    stop.addEventListener('drop', () => {
+        if (draggedItem !== stop) {
+            const allStops = Array.from(divBody.querySelectorAll('.stop'));
+            const draggedIndex = allStops.indexOf(draggedItem);
+            const targetIndex = allStops.indexOf(stop);
+
+            if (draggedIndex < targetIndex) {
+                stop.after(draggedItem);
+            } else {
+                stop.before(draggedItem);
+            }
+        }
+        
+    });
+});
+
+}
+
     </script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     
     <!-- Required vendors -->
     <script src="./vendor/global/global.min.js"></script>

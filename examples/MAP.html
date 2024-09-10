@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet Map with Markers</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // 创建地图实例
+        const map = L.map('map').setView([30.5728, 104.0665], 5); // 初始视图设置为成都
+
+        // 添加 OpenStreetMap 图层
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // 定义多个标记位置
+        const markers = [
+            { coords: [39.9042, 116.4074], label: '北京' },   // 北京
+            { coords: [31.2304, 121.4737], label: '上海' },   // 上海
+            { coords: [23.1291, 113.2644], label: '广州' },    // 广州
+            { coords: [30.5728, 104.0665], label: '成都' }     // 成都
+        ];
+
+        // 添加标记到地图
+        const markerLayers = markers.map(marker => {
+            const markerIcon = L.icon({
+                iconUrl: 'https://unpkg.com/leaflet/dist/images/marker-icon.png',
+                shadowUrl: 'https://unpkg.com/leaflet/dist/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+
+            const markerLayer = L.marker(marker.coords, { icon: markerIcon }).addTo(map);
+            markerLayer.bindPopup(marker.label);
+            return markerLayer;
+        });
+
+        // 连接标记
+        const latLngs = markers.map(marker => marker.coords);
+        const polyline = L.polyline(latLngs, { color: 'blue' }).addTo(map);
+
+        // 调整视图以适应所有标记
+        map.fitBounds(polyline.getBounds());
+    </script>
+</body>
+</html>
