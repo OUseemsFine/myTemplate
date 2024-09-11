@@ -19,76 +19,18 @@
         <link href="./vendor/datatables/css/jquery.dataTables.min.css" rel="stylesheet">
             <!-- Custom Stylesheet -->
         <link href="./css/style.css" rel="stylesheet">
-        <!-- <style>
-/* check busLine number if_validate style */
-input[type="number"] {
-            padding: 10px;
-            width: 200px;
-            margin-right: 10px;
-        }
-.message {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 5px;
-        }
-.exists {
-            color: red;
-            background-color: #f8d7da;
-        }
-.not-exists {
-            color: green;
-            background-color: #d4edda;
-        }
-
-/*  drag stop: */
-
-.stopContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 10px; /* 这行可以保留，如果你希望在 flex 元素之间有间隔 */
-}
-
-.error {
-            color: red;
-            display: none; /* 默认隐藏 */
-            margin-left: 10px;
-        }
-
-.drag{ 
-    color: aqua;
-}
-
-.stop {
-    background-color: purple;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: move;
-    user-select: none;
-    transition: background-color 0.3s;
-    margin-bottom: 10px; /* 添加下边距，确保每个 stop 之间有间隔 */
-}
-
-.stop:last-child {
-    margin-bottom: 0; /* 最后一个 stop 不需要下边距 */
-}
-
-.stop:hover {
-    background-color: #0056b3;
-}
-            tr:hover {
-                background-color: purple;
-                color: purple;
-            }
-            .selected {
-                background-color: gray;
-                color: violet;
-            }
-        </style> -->
-
-    <!--style of this page-->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
+.marker-label {
+    background-color: white;
+    border: 1px solid blue;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 20px; /* 确保数字垂直居中，调整为更小的值 */
+    width: 5px; /* 设置宽度 */
+    height: 5px; /* 设置高度 */
+    font-size: 12px; /* 调整字体大小 */
+}
         .drag{
             color: aqua;
         }
@@ -503,6 +445,7 @@ input[type="number"] {
 let StationList = {};
 let Stations = [];  
 let StationSequences;
+let Allstations;
 
 window.onload = start();
 
@@ -551,6 +494,7 @@ async function fetchBuslines() {
     }
 }
 
+//加载busline
 function load_lineTable(Buslines) {
     const tableBody = document.getElementById('line-table');
     tableBody.innerHTML = ''; // 清空之前的内容
@@ -592,8 +536,8 @@ async function manageBusline(id,lineNumber,startTime,endTime,Price,description,s
     document.getElementById('status').value = status
     await fetchStationSequences(lineNumber);
     await initializeStationList();
+    connectMarkers(Allstations,Stations);
     await updateSelectedStations();
-
 }
 
 //Map:
@@ -682,6 +626,106 @@ function loadStationsOnMap(stations){
     });
 }
 
+// 输入station sequence， 按照次序连接marker:
+function connectMarkers(allStations, stationsToConnect){
+    if(stationsToConnect.length === 0) return;
+    if(map){
+    map.remove();
+  }
+  map = L.map('map').setView([29.5630,106.5708],12)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+  
+    for(const id in markers){
+        markers[id].remove();
+    }
+    markers = {};
+
+    const remainingStations = allStations.filter(station => !stationsToConnect.includes(station));
+
+    // console.log(JSON.stringify(stationsToConnect));
+    // console.log(JSON.stringify(remainingStations));
+    // console.log(JSON.stringify(allStations));
+
+    remainingStations.forEach(station => {
+        const status = station.status;
+        if(status === 'o'){
+        const marker = L.marker([station.latitude,station.longitude],{icon:setIcon(status)})
+        .addTo(map)
+        .bindPopup(bindPopupContent(station));
+        };
+        if(status === 'm'){
+        const marker = L.marker([station.latitude,station.longitude],{icon:setIcon(status)})
+        .addTo(map)
+        .bindPopup(bindPopupContent(station));
+        };
+        if(status === 'b'){
+        const marker = L.marker([station.latitude,station.longitude],{icon:setIcon(status)})
+        .addTo(map)
+        .bindPopup(bindPopupContent(station));
+        };
+
+    });
+
+    let connectMarkers;
+// 创建标记并添加到地图，同时记录它们的位置
+connectMarkers = stationsToConnect.map(station => {
+    const status = station.status;
+        if(status === 'o'){
+        const marker = L.marker([station.latitude,station.longitude],{icon:setIcon(status)})
+        .addTo(map)
+        .bindPopup(bindPopupContent(station));
+        return marker;
+        };
+        if(status === 'm'){
+        const marker = L.marker([station.latitude,station.longitude],{icon:setIcon(status)})
+        .addTo(map)
+        .bindPopup(bindPopupContent(station));
+        return marker;
+        };
+        if(status === 'b'){
+        const marker = L.marker([station.latitude,station.longitude],{icon:setIcon(status)})
+        .addTo(map)
+        .bindPopup(bindPopupContent(station));
+        return marker;
+        };
+});
+
+// 获取每个标记的位置
+const latLngs = connectMarkers.map(marker => marker.getLatLng());
+
+// 创建多边形线并添加到地图
+const polyline = L.polyline(latLngs, { color: 'blue' }).addTo(map);
+
+    // 在每条线的中间位置添加顺序数字
+    latLngs.forEach((latLng, index) => {
+        const markerIndex = index + 1; // 顺序从 1 开始
+        const label = L.divIcon({
+            className: 'marker-label',
+            html: markerIndex.toString(),
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        });
+        
+        // 计算中间位置
+        const nextLatLng = latLngs[index + 1];
+        if (nextLatLng) {
+            const midLatLng = [
+                (latLng.lat + nextLatLng.lat) / 2,
+                (latLng.lng + nextLatLng.lng) / 2
+            ];
+
+            L.marker(midLatLng, { icon: label }).addTo(map);
+            
+        }
+    });
+
+// 调整视图以确保线路可见
+map.fitBounds(polyline.getBounds());
+}
+
 async function fetchStations() {
     const csrfToken = await getCsrfToken(); // 获取CSRF令牌
     const response = await fetch('http://127.0.0.1:8000/catalog/api/stations/list', {
@@ -694,6 +738,7 @@ async function fetchStations() {
         const stations = await response.json();
         Object.values(stations).forEach(station=>{
         StationList[station.id] = station;
+        Allstations = stations;
     });
         //initializeStationList(stations);
         //updateSelectedStations();
