@@ -398,7 +398,7 @@
 
                                      </form>  
                                      <span class="col-6"><button type="button" class="btn btn-success" id="updateButton" onclick="updateBusline()">更新</button></span>
-                                     <span class="col-6"><button type="button" class="btn btn-danger" id="deleteButton">删除</button></span>                                
+                                     <span class="col-6"><button type="button" class="btn btn-danger" id="deleteButton" onclick="deleteBusline()">删除</button></span>                                
                                  </div>
                             </div>
                         </div>
@@ -598,21 +598,21 @@ function bindPopupContent(station){
     return content;
 }
 
-function chooseStation(id){
+async function chooseStation(id){
     const exists = Stations.some(station => station.id === id);
     if(exists){
         const newArray = Stations.filter(item => item.id !== id);
         Stations = newArray;
-        updateSelectedStations();
-        connectMarkers(Allstations, Stations);
+        await updateSelectedStations();
+        await connectMarkers(Allstations, Stations);
     }else{
         // document.getElementById('station-list').innerHTML +=`
         //         <div class="timeline-badge primary"></div>
         //         <div class="timeline-panel text-muted"  draggable="true" id="${sName}">${sName}</div>        
         // `;
         Stations.push(StationList[id]);
-        updateSelectedStations();
-        connectMarkers(Allstations, Stations);
+        await updateSelectedStations();
+        await connectMarkers(Allstations, Stations);
     }
 }
 
@@ -818,7 +818,7 @@ function updateSelectedStations() {
              const divBody = document.getElementById('stations');
              divBody.innerHTML = ``;
             //selectedStationsContainer.innerHTML = '';
-            Object.values(Stations).forEach(station => {
+            Stations.forEach(station => {
                 const draggableStop = document.createElement('li');
                 draggableStop.className = `drag`;
                 draggableStop.id =`station-list`;
@@ -859,26 +859,53 @@ stops.forEach(stop => {
             const targetIndex = allStops.indexOf(stop);
 
 
-            // if (draggedIndex < targetIndex) {
-            //     stop.after(draggedItem);
-            // } else {
-            //     stop.before(draggedItem);
-            // }
+            if (draggedIndex < targetIndex) {
+                stop.after(draggedItem);
+            } else {
+                stop.before(draggedItem);
+            }
 
-
-                // 更新 Stations 数据
-                const draggedStation = Stations[draggedIndex];
-                Stations.splice(draggedIndex, 1);
-                Stations.splice(targetIndex, 0, draggedStation);
-
-                // 重新渲染列表
-                updateSelectedStations();
+            connectMarkers(Allstations,renewStations());
         }
         
     });
 });
 
 
+}
+
+//delete bus-line:
+async function deleteBusline() {
+    Swal.fire({
+                title: '警告',
+                text: '您确定要删除此公交线路吗？',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+    const lineNumber = document.getElementById('lineNumber').value;
+    fetch(`http://127.0.0.1:8000/catalog/api/busline/delete/${lineNumber}`, {
+    method: 'DELETE'
+})
+.then(response => {
+    if (response.ok) {
+        Swal.fire({ icon: 'success', title: '成功!', text: '删除完成' });
+        console.log('Busline deleted successfully.');
+    } else {
+        console.error('Failed to delete busline.');
+    }
+});
+reload();
+                } else {
+                    // 用户点击了 "取消"
+                    console.log("删除操作已取消");
+                }
+            });
+ 
+    
 }
 
 //update bus-line info:
@@ -935,6 +962,22 @@ if (response.ok) {
 //     { station_id: 2, order: 2 },
 //     { station_id: 3, order: 3 }
 // ];
+
+function renewStations(){
+// 获取所有的timeline-panel元素
+const timelinePanels = document.querySelectorAll('.timeline-panel.text-muted');
+// 创建一个数组来存储信息
+const stationNames = [];
+Stations = [];
+// 遍历每个元素并将其信息添加到数组中
+timelinePanels.forEach(panel => {
+    stationNames.push(panel.innerText);
+});
+stationNames.forEach((stationName,index) => {
+    Stations.push(getStationbyName[stationName]);
+   });
+   return Stations;
+}
 
 function setStationData(){
 // 获取所有的timeline-panel元素
