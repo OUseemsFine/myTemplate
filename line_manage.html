@@ -338,8 +338,8 @@
                                         <thead>
                                             <tr>
                                                 <th>线路号</th>                       
-                                                <th>站点数量</th>
-                                                <th>车辆数量</th>
+                                                <th>运营时间</th>
+                                                <th>票价(元)</th>
                                                 <th>状态</th>
                                                 <th>操作</th>
                                             </tr>
@@ -355,7 +355,7 @@
                     </div>
 
                     <div class="col-5">
-                        <div class="card" style="height: 800px;">
+                        <div class="card" style="height: 800px; overflow-y: auto;">
                             <div class="card-header">
                                 <h4 class="card-title">线路信息</h4>
                             </div>
@@ -397,7 +397,7 @@
                                      <form id="stationForm" style="display: none;">
 
                                      </form>  
-                                     <span class="col-6"><button type="button" class="btn btn-success" id="updateButton">更新</button></span>
+                                     <span class="col-6"><button type="button" class="btn btn-success" id="updateButton" onclick="updateBusline()">更新</button></span>
                                      <span class="col-6"><button type="button" class="btn btn-danger" id="deleteButton">删除</button></span>                                
                                  </div>
                             </div>
@@ -505,8 +505,8 @@ function load_lineTable(Buslines) {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td style="color: purple;">${busline.lineNumber}</td>
-            <td style="color: blue;">${1}</td>
-            <td style="color: blue;">${1}</td>
+            <td style="color: grey;">${busline.startTime} - ${busline.endTime}</td>
+            <td style="color: black;">${busline.Price}</td>
             <td><span class="${statusClassMapping[busline.status] || ''}">${statusMapping[busline.status] || '未知状态'}</span></td>
             <td>
                 <button class="btn btn-info" 
@@ -839,7 +839,48 @@ stops.forEach(stop => {
     });
 });
 
+
 }
+
+//update bus-line info:
+async function updateBusline() {
+    let lineNumber = -1;
+    lineNumber = document.getElementById('lineNumber').value;
+    let startTime=document.getElementById('startTime').value;
+    let endTime=document.getElementById('endTime').value;
+    let Price =document.getElementById('Price').value;
+    let description=document.getElementById('description').value;
+    let status=document.getElementById('status').value;
+    if(lineNumber===-1) return;
+const csrfToken = await getCsrfToken();
+
+const response = await fetch('http://127.0.0.1:8000/catalog/api/busline/update', {
+    method: 'PATCH',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken // 添加 CSRF 令牌
+    },
+    body: JSON.stringify({
+    status: status,
+    startTime: startTime,
+    endTime: endTime,
+    lineNumber: lineNumber,
+    Price: Price,
+    description: description,
+    })
+});
+
+if (response.ok) {
+    const result = await response.json();
+    //console.log(JSON.stringify(result));
+    location.reload();
+} else {
+    const error = await response.json();
+    console.log(JSON.stringify(error));
+}
+}
+
+//update station sequences:
 
     </script>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
