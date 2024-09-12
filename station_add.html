@@ -354,7 +354,9 @@
                             map.on('click', function(e) {
                                 var lat = e.latlng.lat.toFixed(5);
                                 var lng = e.latlng.lng.toFixed(5);
-                                document.getElementById('coordinates').innerHTML = `纬度: ${lat},经度: ${lng},`;
+                                document.getElementById('coordinates').innerHTML = `纬度: ${lat},经度: ${lng}`;
+                                document.getElementById('latitude').value = lat;
+                                document.getElementById('longitude').value = lng;
                         
                                 // 反向地理编码获取地点信息
                                 fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
@@ -362,6 +364,7 @@
                                     .then(data => {
                                         if (data.display_name) {
                                             document.getElementById('coordinates').innerHTML += `<br>地点: ${data.display_name}`;
+                                            document.getElementById('sName').value = data.display_name;
                                         } else {
                                             document.getElementById('coordinates').innerHTML += `<br>未找到地点信息`;
                                         }

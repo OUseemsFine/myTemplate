@@ -13,22 +13,38 @@
     <link href="./vendor/jqvmap/css/jqvmap.min.css" rel="stylesheet">
     <link href="./css/style.css" rel="stylesheet">   
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.js"></script>
+<style>
+    .noty_body {
+        background-color: blue; /* 更改背景颜色 */
+        color: white; /* 更改字体颜色 */
+        font-family: Arial, sans-serif; /* 更改字体 */
+        padding: 40px; /* 内边距 */
+        border-radius: 5px; /* 圆角 */
+    }
+</style>
     <style>
-        .highlight {
+        .highlight{
             font-size: 32px;
-            color: orange; /* 已标亮颜色 */
+            color:orange;
         }
-        .bus-icon {
+        .bus-icon{
             font-size: 32px;
-            color: green; /* 未标亮颜色 */
+            color: green;
         }
-        .bus-maintain {
+        .bus-icon-building{
             font-size: 32px;
-            color: grey;
+            color: purple;
         }
-        .bus-build {
+        .bus-icon-maintaining{
             font-size: 32px;
-            color: blueviolet;
+            color: red;
+        }
+        #map {
+            height: 600px; /* 地图高度 */
+            width: 100%; /* 地图宽度 */
+            margin-right: 20px; /* 与表单的间距 */
         }
     </style> 
 
@@ -226,16 +242,14 @@
                     <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i
                                 class="icon icon-world-2"></i><span class="nav-text">线路</span></a>
                         <ul aria-expanded="false">
-                            <li><a href="./ui-accordion.html">查看线路</a></li>
                             <li><a href="./line_add.html">添加线路</a></li>
-                            <li><a href="./ui-alert.html">修改线路</a></li>
+                            <li><a href="./line_manage.html">管理线路</a></li>
                         </ul>
                     </li>
 
                     <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i
                                 class="icon icon-plug"></i><span class="nav-text">站点</span></a>
                         <ul aria-expanded="false">
-                            <li><a href="./uc-select2.html">站点数据</a></li>
                             <li><a href="./station_add.html">添加站点</a></li>
                             <li><a href="./station_manage.html">管理站点</a></li>
                         </ul>
@@ -288,10 +302,10 @@
                     <div class="col-sm-6 p-md-0">
                         <div class="welcome-text">
                             <h4>站点信息表</h4>
-                            <p class="mb-0">点击按钮以修改站点信息</p>
+                            <p class="mb-0">修改站点信息</p>
                         </div>
                         <div class="sidebar">
-                            <button id="fetch-stations" class="btn btn-primary">加载信息</button>
+                            <!-- <button id="fetch-stations" class="btn btn-primary">加载信息</button> -->
                         </div>
                     </div>
                     <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
@@ -305,12 +319,12 @@
 
                 <div class="row">
                     <div class="col-lg-12">
-                        <div class="card">
+                        <div class="card" >
                             <div class="card-header">
                                 <h4 class="card-title">站点信息</h4>
                             </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
+                            <div class="card-body" >
+                                <div class="table-responsive" style="max-height: 300px; overflow-y: scroll;">
                                     <table class="table table-responsive-sm">
                                         <thead>
                                             <tr>
@@ -321,7 +335,7 @@
                                                 <th>操作</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="station-table">
+                                        <tbody id="station-table" >
                                             <tr>
                                                 <th>1</th>
                                                 <td>example</td>
@@ -427,6 +441,19 @@ const highlightedBusIcon = L.divIcon({
     iconSize: [32, 32],
 });
 
+const busIcon_building = L.divIcon({
+    className: 'bus-icon-building',
+    html: '<i class="fas fa-bus"></i>',
+    iconSize: [32, 32],
+});
+
+const busIcon_maintaining = L.divIcon({
+    className: 'bus-icon-maintaining',
+    html: '<i class="fas fa-bus"></i>',
+    iconSize: [32, 32],
+});
+
+
 // 获取CSRF令牌
 async function getCsrfToken() {
     const response = await fetch('http://127.0.0.1:8000/catalog/api/get-csrf-token/');
@@ -461,13 +488,37 @@ async function fetchStations() {
         const stations = await response.json();
         loadStationsOnMap(stations); // 加载站点到地图
         displayStations(stations); // 显示站点信息表格
-        Swal.fire({ icon: 'success', title: '成功!', text: '站点信息已成功加载。' });
+        // Swal.fire({ icon: 'success', title: '成功!', text: '站点信息已成功加载。' });
     } else {
         const errorData = await response.json();
         Swal.fire({ icon: 'error', title: '错误!', text: errorData.detail || '获取站点信息失败。' });
     }
 }
-window.onload(fetchStations());
+window.onload = fetchStations();
+
+function setIcon(status){
+    if(status === 'o'){
+        return busIcon;
+        };
+        if(status === 'm'){
+        return busIcon_maintaining;
+        };
+        if(status === 'b'){
+        return busIcon_building;
+        };
+}
+
+function bindPopupContent(station){
+    const content = `
+      <div>
+        站点名: ${station.sName}</br>
+        站点位置(纬度,经度): ${station.latitude}, ${station.longitude}</br>
+        <button class="badge-rounded btn-secondary" onclick="chooseStation(${station.id})">已选中</button>
+      </div>
+    `;
+    return content;
+}
+
 
 // 加载所有站点并在地图上显示标记
 function loadStationsOnMap(stations) {
@@ -476,7 +527,45 @@ function loadStationsOnMap(stations) {
     }
     
     // 初始化地图
-    map = L.map('map').setView([29.5630, 106.5708], 15); // 设置地图中心为重庆
+    map = L.map('map').setView([29.5630, 106.5708], 12); // 设置地图中心为重庆
+
+    // 存储标记的变量
+    var currentMarker = null;
+
+    map.on('click', function(e) {
+                                var lat = e.latlng.lat.toFixed(5);
+                                var lng = e.latlng.lng.toFixed(5);
+                                //document.getElementById('coordinates').innerHTML = `纬度: ${lat},经度: ${lng}`;
+                                // document.getElementById('latitude').value = lat;
+                                // document.getElementById('longitude').value = lng;
+                        
+                                // // 反向地理编码获取地点信息
+                                let locationInfo = `经度: ${lng}, 纬度: ${lat}`;
+                                fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.display_name) {
+                                            locationInfo += `<br>地点: ${data.display_name}`;
+                                        } else {
+                                            locationInfo += `<br>未找到地点信息`;
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error:', error);
+                                        locationInfo += `<br>错误: 无法获取地点信息`;
+                                    });
+                        
+                                // 如果之前有标记，先移除它
+                                if (currentMarker) {
+                                    map.removeLayer(currentMarker);
+                                }
+
+                        
+                                // 添加新标记
+                                currentMarker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map)
+                                    .bindPopup(locationInfo)
+                                    .openPopup();
+                            });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
@@ -490,18 +579,37 @@ function loadStationsOnMap(stations) {
     markers = {}; // 重置标记对象
 
     stations.forEach(station => {
-        const marker = L.marker([station.latitude, station.longitude], { icon: busIcon })
-            .addTo(map)
-            .bindPopup(station.sName);
+        let marker;
+        const status = station.status;
+        if(status === 'o'){
+        marker = L.marker([station.latitude,station.longitude],{icon:setIcon(status)})
+        .addTo(map)
+        .bindPopup(bindPopupContent(station));
+        };
+        if(status === 'm'){
+        marker = L.marker([station.latitude,station.longitude],{icon:setIcon(status)})
+        .addTo(map)
+        .bindPopup(bindPopupContent(station));
+        };
+        if(status === 'b'){
+        marker = L.marker([station.latitude,station.longitude],{icon:setIcon(status)})
+        .addTo(map)
+        .bindPopup(bindPopupContent(station));
+        };
 
-        // 点击标记时调用 manageStation 函数
+
+        //点击标记时调用 manageStation 函数
         marker.on('click', function() {
+        // 如果之前有标记，先移除它
+         if (currentMarker) {
+                map.removeLayer(currentMarker);
+                                }
             manageStation(station.id, station.sName, station.status, station.latitude, station.longitude);
             // 重置所有标记的图标
-            for (const id in markers) {
-                markers[id].setIcon(busIcon); // 设置为已标亮图标
-            }
-            this.setIcon(highlightedBusIcon); // 设置为未标亮图标
+            // for (const id in markers) {
+            //     markers[id].setIcon(busIcon); // 设置为已标亮图标
+            // }
+            // this.setIcon(highlightedBusIcon); // 设置为未标亮图标
         });
 
         markers[station.id] = marker; // 以 station.id 作为键存储标记
@@ -536,11 +644,7 @@ function manageStation(id, name, status, latitude, longitude) {
     document.getElementById('stationLatitude').value = latitude;
     document.getElementById('stationLongitude').value = longitude;
     document.getElementById('station-form').style.display = 'block'; // 显示表单
-    map.setView([latitude, longitude], 15);
-    for (const id in markers) {
-                markers[id].setIcon(busIcon); // 设置为已标亮图标
-            }
-    markers[id].setIcon(highlightedBusIcon);
+    map.setView([latitude, longitude], 14);
 }
 
 // 删除按钮点击事件
@@ -552,8 +656,6 @@ document.getElementById('deleteButton').addEventListener('click', async () => {
     }
 });
 
-// 绑定按钮
-document.getElementById('fetch-stations').addEventListener('click', fetchStations);
 
 // 更新按钮点击事件
 document.getElementById('updateButton').addEventListener('click', async function(event) {
@@ -565,6 +667,7 @@ document.getElementById('updateButton').addEventListener('click', async function
     const longitude = document.getElementById('stationLongitude').value;
 
     const csrfToken = await getCsrfToken();
+
 
     const response = await fetch('http://127.0.0.1:8000/catalog/api/stations/update', {
         method: 'PATCH',
@@ -582,7 +685,12 @@ document.getElementById('updateButton').addEventListener('click', async function
 
     if (response.ok) {
         const result = await response.json();
-        alert('站点信息更新成功: ' + JSON.stringify(result));
+        await new Noty({
+    text: '更新成功',
+    type: 'success',
+    timeout: 3000,
+    progressBar: true
+}).show();
         fetchStations();
     } else {
         const error = await response.json();
@@ -591,197 +699,6 @@ document.getElementById('updateButton').addEventListener('click', async function
 });
 
 
-
-    //     let selectedStation = null; // 存储选中的站点信息
-    //     let map, marker;
-    
-    //     // 获取CSRF令牌
-    //     async function getCsrfToken() {
-    //         const response = await fetch('http://127.0.0.1:8000/catalog/api/get-csrf-token/');
-    //         const data = await response.json();
-    //         return data.csrfToken; // 根据响应结构调整
-    //     }
-    
-    //     // 状态映射
-    //     const statusMapping = {
-    //         'm': '维护中',
-    //         'o': '运营中',
-    //         'b': '建设中'
-    //     };
-
-    //     //to set each status diffrent color
-    //     const statusClassMapping = {
-    //     'm': 'badge badge-danger',
-    //     'o': 'badge badge-success',
-    //     'b': 'badge badge-primary'
-    // };
-    
-    //     // 获取所有站点信息
-    //     async function fetchStations() {
-    //         const csrfToken = await getCsrfToken(); // 获取CSRF令牌
-    //         const response = await fetch('http://127.0.0.1:8000/catalog/api/stations/list', {
-    //             headers: {
-    //                 'X-CSRFToken': csrfToken
-    //             }
-    //         });
-    
-    //         if (response.ok) {
-    //             const stations = await response.json();
-    //             displayStations(stations);
-    //             Swal.fire({ icon: 'success', title: '成功!', text: '站点信息已成功加载。' });
-    //         } else {
-    //             const errorData = await response.json();
-    //             Swal.fire({ icon: 'error', title: '错误!', text: errorData.detail || '获取站点信息失败。' });
-    //         }
-    //     }
-    
-    //     // 显示站点信息
-    //     function displayStations(stations) {
-    //         const tableBody = document.getElementById('station-table');
-    //         tableBody.innerHTML = ''; // 清空之前的内容
-    
-    //         stations.forEach(station => {
-    //             const row = document.createElement('tr');
-    //             row.innerHTML = `
-    //                 <td>${station.id}</td>
-    //                 <td>${station.sName}</td>
-    //                 <td><span class="${statusClassMapping[station.status] || ''}">${statusMapping[station.status] || '未知状态'}</span></td>
-    //                 <td>${station.latitude}, ${station.longitude}</td>
-    //                 <td>
-    //                     <button class="btn btn-info" onclick="manageStation(${station.id}, '${station.sName}', '${station.status}', ${station.latitude}, ${station.longitude})">选择</button>
-    //                 </td>
-    //             `;
-    //             tableBody.appendChild(row);
-    //         });
-    //     }
-    
-    //     // 管理按钮点击事件
-    //     function manageStation(id, name, status, latitude, longitude) {
-    //         selectedStation = { id, name, status, latitude, longitude }; // 保存选中的站点信息
-    //         document.getElementById('stationName').value = name;
-    //         document.getElementById('stationStatus').value = status;
-    //         document.getElementById('stationLatitude').value = latitude;
-    //         document.getElementById('stationLongitude').value = longitude;
-    //         document.getElementById('station-form').style.display = 'block'; // 显示表单
-    //         initMap(longitude, latitude); // 初始化地图
-    //     }
-
-    //     const busIcon = L.divIcon({
-    //         className: 'bus-icon',
-    //         html: '<i class="fas fa-bus"></i>',
-    //         iconSize: [32, 32],
-    //     });
-
-    //     const highlightedBusIcon = L.divIcon({
-    //         className: 'highlight',
-    //         html: '<i class="fas fa-bus"></i>',
-    //         iconSize: [32, 32],
-    //     });
-
-    //     function map_showStations(stations) {
-    //         busStops.forEach(stop => {
-    //         const marker = L.marker([stop.lat, stop.lon], { icon: busIcon })
-    //             .addTo(map)
-    //             .bindPopup(stop.name);
-
-    //         marker.on('click', function() {
-    //             map.eachLayer(function(layer) {
-    //                 if (layer instanceof L.Marker) {
-    //                     layer.setIcon(busIcon); // 设置为已标亮图标
-    //                 }
-    //             });
-    //             this.setIcon(highlightedBusIcon); // 设置为未标亮图标
-    //         });
-    //     });
-    //     }
-    
-    //     // 初始化地图
-    //     function initMap(longitude, latitude) {
-    //         if (map) {
-    //             map.remove(); // 清除现有地图实例
-    //         }
-    //         map = L.map('map').setView([latitude, longitude], 15); // 设置地图中心和缩放级别
-    
-    //         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    //             maxZoom: 19,
-    //             attribution: '© OpenStreetMap'
-    //         }).addTo(map);
-    
-    //         marker = L.marker([latitude, longitude]).addTo(map); // 添加标记
-    //     }
-    
-    //     // // 更新按钮点击事件
-    //     // document.getElementById('updateButton').addEventListener('click', async () => {
-    //     //     if (selectedStation) {
-    //     //         // 这里可以添加更新逻辑 (API 调用)
-    //     //         const updatedData = {
-    //     //             id: selectedStation.id,
-    //     //             sName: document.getElementById('stationName').value,
-    //     //             status: document.getElementById('stationStatus').value,
-    //     //             latitude: parseFloat(document.getElementById('stationLatitude').value),
-    //     //             longitude: parseFloat(document.getElementById('stationLongitude').value)
-    //     //         };
-    //     //         console.log("更新站点信息:", updatedData);
-    //     //         Swal.fire({ icon: 'success', title: '成功!', text: '站点信息已更新。' });
-    //     //     }
-    //     // });
-    
-    //     // 删除按钮点击事件
-    //     document.getElementById('deleteButton').addEventListener('click', async () => {
-    //         if (selectedStation) {
-    //             // 这里可以添加删除逻辑 (API 调用)
-    //             console.log("删除站点:", selectedStation.id);
-    //             Swal.fire({ icon: 'success', title: '成功!', text: '站点信息已删除。' });
-    //         }
-    //     });
-    
-    //     // 绑定按钮
-    //     document.getElementById('fetch-stations').addEventListener('click', fetchStations);
-    
-    // //<!--**********************************
-    //     //fetch stations Scripts end
-    // //***********************************-->
-
-    // //<!--**********************************
-    //     //update station Scripts start
-    // //***********************************-->
-    
-    //     document.getElementById('updateButton').addEventListener('click', async function(event) {
-    //         event.preventDefault(); // 阻止默认表单提交
-    
-    //         const sName = document.getElementById('stationName').value;
-    //         const status = document.getElementById('stationStatus').value;
-    //         const latitude = document.getElementById('stationLatitude').value;
-    //         const longitude = document.getElementById('stationLongitude').value;
-    
-    //         const csrfToken = await getCsrfToken();
-    
-    //         const response = await fetch('http://127.0.0.1:8000/catalog/api/stations/update', {
-    //             method: 'PATCH',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //                 'X-CSRFToken': csrfToken // 添加 CSRF 令牌
-    //             },
-    //             body: JSON.stringify({
-    //                 sName: sName,
-    //                 status: status,
-    //                 latitude: latitude,
-    //                 longitude: longitude
-    //             })
-    //         });
-    
-    //         if (response.ok) {
-    //             const result = await response.json();
-    //             alert('站点信息更新成功: ' + JSON.stringify(result));
-    //             fetchStations();
-    //         } else {
-    //             const error = await response.json();
-    //             alert('更新失败: ' + JSON.stringify(error));
-    //         }
-    //     });
-    //<!--**********************************
-        //update station Scripts end
-    //***********************************-->
     </script>
 
     <!-- Required vendors -->

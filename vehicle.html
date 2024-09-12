@@ -22,18 +22,36 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.js"></script>
-   
     <style>
-                .noty_body {
+        .noty_body {
             background-color: rgb(135, 48, 175);/* 更改背景颜色 */
             color: white; /* 更改字体颜色 */
             font-family: Arial, sans-serif; /* 更改字体 */
             padding: 40px; /* 内边距 */
             border-radius: 5px; /* 圆角 */
         }
+        /* 悬停显示信息： */
+        .tooltip {
+            display: none;
+            position: absolute;
+            background-color: #333;
+            color: white;
+            padding: 5px;
+            border-radius: 5px;
+            top: 40px; /* 调整信息窗口的垂直位置 */
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            z-index: 1;
+        }
+        .button:hover .tooltip {
+            display: block;
+        }
+    </style>
+    <style>
 .marker-label {
     background-color: white;
-    border: 1px solid blue;
+    border: 1px solid rgba(137, 6, 166, 0.553);
     border-radius: 50%;
     text-align: center;
     line-height: 20px; /* 确保数字垂直居中，调整为更小的值 */
@@ -326,8 +344,8 @@
                 <!-- row -->
 
 
-                <div class="row">
-                    <div class="col-7">
+                <div class="row" >
+                    <div class="col-7" style="display: none;">
                         <div class="card" style="height: 800px;">
                             <div class="card-header">
                                 <h4 class="card-title" id="buslineTitle" style="display: none;">线路数据表</h4>
@@ -363,7 +381,7 @@
                         </div>
                     </div>
 
-                    <div class="col-5">
+                    <div class="col-5" style="display: none;">
                         <div class="card" style="height: 800px; overflow-y: auto;">
                             <div class="card-header">
                                 <h4 class="card-title">线路信息</h4>
@@ -414,7 +432,7 @@
                     </div>
 
 
-                    <div class="col-8">
+                    <div class="col-8" style="display: none;">
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="card-title">地图信息</h4>
@@ -425,9 +443,9 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="col-4">
-                        <div class="card">
+<!-- 
+                    <div class="col-4" style="display: none;">
+                        <div class="card" style="display: none;">
                             <div class="card-header">
                                 <h4 class="card-title">沿线站点</h4>
                             </div>
@@ -438,7 +456,218 @@
                                 </div>
                             </div>
                         </div>
+                    </div> 
+                    -->
+
+                    <div class="col-12" id="vehicle-div">
+                        <div class="card" style="height: 600px;">
+                            <div class="card-header">
+                            
+                                <h4 class="card-title"> 
+                                    车辆信息
+                                </h4>
+
+                                <div class="bootstrap-badge">
+                                    <button type="button" class="btn btn-rounded btn-info"><span
+                                        class="btn-icon-left text-info"><i class="fa fa-plus color-info"></i>
+                                    </span>添加车辆</button>
+                                    <button type="button" class="btn btn-rounded btn-outline-primary">所有车辆</button>
+                                    <button type="button" class="btn btn-rounded btn-outline-warning">车辆维修</button>
+                                    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">筛选</button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="javascript:void()">按类别</a>
+                                        <a class="dropdown-item" href="javascript:void()">按厂商</a>
+                                    </div>
+                                </div>
+                        
+                            </div>
+                            <div class="card-body col-12" style="overflow-y: auto;">
+                                <div class="table-responsive" >
+                                    <table class="table header-border table-hover verticle-middle">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">车牌号</th>
+                                                <th scope="col">型号</th>
+                                                <th scope="col">类别</th>
+                                                <th scope="col">生产时间</th>
+                                                <th scope="col">最后维修时间</th>
+                                                <th scope="col">线路</th>
+                                                <th scope="col">状态</th>
+                                                <th scope="col">具体</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="vehicle-table">
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+
+
+                        </div>
+
+                        </div>
                     </div>
+
+                    <div class="col-6" id="vehicleDetail-div" style="display: none;">
+                        <div class="card" style="height: 600px;">
+                           <div class="card-header">
+                            <div class="bootstrap-badge">
+                            <button type="button" 
+                            onclick="closeDetail()"
+                            class="card-title badge-light" >关闭</button>
+                            </div>    
+                           </div>
+                           <div class="card-body" style="overflow-y: auto;">
+
+
+                            <div class="card text-white bg-dark" >
+                                <div class="card-header">
+                                    <h5 class="card-title text-white" id="vehicle-title">车型信息</h5>
+                                </div>
+                                <div class="card-body mb-0" id="detail-info">
+                                    <!-- <p class="card-text" id="vehicle-description">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
+                                    <!-- <a href="javascript:void()" class="btn btn-light btn-card text-dark">Go
+                                        somewhere</a> -->
+                                </div>
+                                <!-- <div class="card-footer bg-transparent border-0 text-white">Last updateed 3 min ago
+                                </div> -->
+                            </div>
+
+                            <div class="card" id="stations-div" style="background-color: #add8e6;">
+                                <div class="card-header">
+                                    <h4 class="card-title" style="color: white;">沿线站点</h4>
+                                </div>
+                                <div class="card-body ">
+                                    <div class="widget-timeline">
+                                        <ul class="timeline" id="stations" >
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- <div class="basic-form">
+                                <form>
+
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <label>First Name</label>
+                                            <input type="text" class="form-control" placeholder="1234 Main St">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label>Email</label>
+                                            <input type="email" class="form-control" placeholder="Email">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label>Password</label>
+                                            <input type="password" class="form-control" placeholder="Password">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label>City</label>
+                                            <input type="text" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-4">
+                                            <label>State</label>
+                                            <select id="inputState" class="form-control">
+                                                <option selected>Choose...</option>
+                                                <option>Option 1</option>
+                                                <option>Option 2</option>
+                                                <option>Option 3</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-2">
+                                            <label>Zip</label>
+                                            <input type="text" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox">
+                                            <label class="form-check-label">
+                                                Check me out
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Sign in</button>
+                                </form>
+                            </div> -->
+
+
+
+                           </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-6" id="addVehicle-div" style="display: none;">
+                        <div class="card" style="height: 600px;">
+                           <div class="card-header">
+                            <div class="bootstrap-badge">
+                            <button type="button" 
+                            onclick="closeAddVehicle()"
+                            class="card-title badge-light" >关闭</button>
+                            </div>    
+                           </div>
+                           <div class="card-body" style="overflow-y: auto;">
+
+                            <div class="addVehicle-form">
+                                <form>
+
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <label>First Name</label>
+                                            <input type="text" class="form-control" placeholder="1234 Main St">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label>Email</label>
+                                            <input type="email" class="form-control" placeholder="Email">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label>Password</label>
+                                            <input type="password" class="form-control" placeholder="Password">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label>City</label>
+                                            <input type="text" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-4">
+                                            <label>State</label>
+                                            <select id="inputState" class="form-control">
+                                                <option selected>Choose...</option>
+                                                <option>Option 1</option>
+                                                <option>Option 2</option>
+                                                <option>Option 3</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-2">
+                                            <label>Zip</label>
+                                            <input type="text" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox">
+                                            <label class="form-check-label">
+                                                Check me out
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Sign in</button>
+                                </form>
+                            </div>
+
+
+
+                           </div>
+                        </div>
+                    </div>
+
+
 
                 </div>
             </div>
@@ -451,6 +680,7 @@
         Scripts
     ***********************************-->
     <script>
+// global variable:
 let StationList = {};
 let Stations = [];
 let ChoosenStations = {};  
@@ -459,12 +689,28 @@ let Allstations;
 let getBuslineId = {};
 let getStationbyName = {};
 
+
+let getVehicles = {};
+const div_vehicle = document.getElementById('vehicle-div');
+const div_vehicleDetail = document.getElementById('vehicleDetail-div');
+const SHOW = div_vehicle.style.display;
+
 window.onload = start();
 
-function start(){
-    fetchBuslines();
-    fetchStations();
+async function start(){
+    await fetchBuslines();
+    await fetchStations();
+    await fetchVehicles();
 }
+
+const vTypeMapping = {
+        'n': '普通公交车',
+        'm': '微型公交车',
+        'j': '大型公交车',
+        'c': '柴油公交车',
+        'd': '电动公交车',
+}
+
 // 状态映射
 const statusMapping = {
     'm': '维护中',
@@ -502,8 +748,7 @@ async function fetchBuslines() {
             getBuslineId[busline.lineNumber] = busline.id;
         });
         await load_lineTable(busLines); // 显示站点信息表格
-        notify("加载完成");
-        //Swal.fire({ icon: 'success', title: '成功!', text: '加载完成' });
+        //notify('线路加载成功')
     } else {
         const errorData = await response.json();
         //Swal.fire({ icon: 'error', title: '错误!', text: errorData.detail || '获取站点信息失败。' });
@@ -809,7 +1054,7 @@ async function fetchStationSequences(lineNumber) {
         // const errorData = await response.json();
         // Swal.fire({ icon: 'error', title: '错误!', text: errorData.detail || '获取站点信息失败。' });
     }
-    notify("站点已选中");
+    //Swal.fire({ icon: 'success', title: '成功!', text: '站点信息已成功加载。' });
 }
 
 function initializeStationList(){
@@ -830,11 +1075,14 @@ function updateSelectedStations() {
             //selectedStationsContainer.innerHTML = '';
             Stations.forEach(station => {
                 const draggableStop = document.createElement('li');
-                draggableStop.className = `drag`;
+                draggableStop.className = ``;
                 draggableStop.id =`station-list`;
                 draggableStop.innerHTML = `
                 <div class="timeline-badge primary"></div>
-                <div class="timeline-panel text-muted"  draggable="true" id="${station.sName}">${station.sName}</div>
+                <div class="timeline-panel text-white"  
+                draggable="true" 
+                id="${station.sName}" 
+                >${station.sName}</div>
                 `;
                 divBody.appendChild(draggableStop);
   
@@ -1034,10 +1282,131 @@ async function updateStationSequences(buslineId, stationData) {
     }
 }
 
+
+//vehicle section:
+async function fetchVehicles(){
+    const csrfToken = await getCsrfToken(); // 获取CSRF令牌
+    const response = await fetch('http://127.0.0.1:8000/catalog/api/vehicle/fetch/all', {
+        headers: {
+            'X-CSRFToken': csrfToken
+        }
+    });
+
+    if (response.ok) {
+        const vehicles = await response.json();
+        await load_vehicleTable(vehicles); // 显示站点信息表格
+        notify('车辆信息加载成功');
+    } else {
+        const errorData = await response.json();
+        notify_error('车辆信息加载失败');
+        //Swal.fire({ icon: 'error', title: '错误!', text: errorData.detail || '获取站点信息失败。' });
+    }
+}
+
+function set_vehicleInfo(vehicle){
+    const divBody = document.getElementById('detail-info');
+    divBody.innerHTML = '';
+    const content = document.createElement('p');
+    content.className = "card-text";
+    content.innerHTML = `
+    型号: ${vehicle.vModel} </br>
+    厂商: ${vehicle.manufacturer} </br>
+    类型: ${vTypeMapping[vehicle.vType]} </br>
+    载客量: ${vehicle.capacity} </br>
+    简介: ${vehicle.description} 
+    `;
+    divBody.appendChild(content);
+}
+
+function load_vehicleTable(vehicles){
+    const tableBody = document.getElementById('vehicle-table');
+    tableBody.innerHTML = ''; // 清空之前的内容
+
+    vehicles.forEach(vehicle => {
+        let lineNumber;
+        if(vehicle.busline===null) lineNumber = -1
+        else lineNumber = vehicle.busline.lineNumber
+        // 状态类映射
+const highlightNull = {
+    '未分配': 'color: red;',
+};
+        // const personInfo = JSON.stringify(busline, null, 2);
+        // alert(personInfo);
+        const row = document.createElement('tr');
+        getVehicles[vehicle.plateNumber] = vehicle;
+        row.innerHTML = `
+            <td style="color: purple;">${vehicle.plateNumber}</td>
+            <td style="color: grey;">${vehicle.vehicle.manufacturer}${vehicle.vehicle.vModel}</td>
+            <td style="color: black;">${vTypeMapping[vehicle.vehicle.vType]}</td>
+            <td style="color: grey;">${vehicle.produce_date}</td>
+            <td style="color: orange;">${vehicle.last_maintenance_date}</td>
+            <td style="${highlightNull[lineNumber] || 'color: green'}">${(lineNumber === -1) ? '未分配' : lineNumber}</td>
+            <td><span class="${statusClassMapping[vehicle.status] || ''}">${statusMapping[vehicle.status] || '未知状态'}</span></td>
+
+        <td>
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">操作</button>
+                                    <div class="dropdown-menu">
+                                        <button type="button" class="dropdown-item" onclick="vehicleDetail('${vehicle.plateNumber}',${lineNumber})">查看</button>
+                                        <button type="button" class="dropdown-item" onclick="javascript:void()">维修</button>
+                                    </div></td>
+
+        `;
+//         <td><div class="rounded-button">
+// <button type="button" class="btn btn-rounded btn-outline-dark"
+// onclick="vehicleDetail(
+// '${vehicle.plateNumber}'
+// )">查看</button>
+//             </div></td>
+
+        tableBody.appendChild(row);
+    });
+}
+
+//add vehicle:
+async function addVehicle(){
+    div_vehicle.className = "col-8";
+    div_vehicleDetail.className = "col-4";
+}
+
+//vehicle-detail:
+async function vehicleDetail(plateNumber, lineNumber){
+    //console.log(plateNumber);
+    const vehicle = getVehicles[plateNumber];
+    div_vehicle.className = "col-8";
+    div_vehicleDetail.className = "col-4";
+    div_vehicleDetail.style.display = SHOW;
+
+    document.getElementById('vehicle-title').textContent = plateNumber;
+    set_vehicleInfo(vehicle.vehicle);
+    
+    
+    //display the stations:
+    await fetchStationSequences(lineNumber);
+    await initializeStationList();
+    connectMarkers(Allstations,Stations);
+    await updateSelectedStations();
+    
+}
+
+function closeDetail(){
+    div_vehicle.className = "col-12";
+    div_vehicleDetail.style.display = 'none';
+}
+
+
 function notify(text){
     new Noty({
     text: text,
     type: 'success',
+    timeout: 3000,
+    progressBar: true
+}).show();
+}
+
+function notify_error(text){
+    new Noty({
+    text: text,
+    type: 'error',
     timeout: 3000,
     progressBar: true
 }).show();
