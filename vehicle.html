@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.js"></script>
     <style>
+               
         .noty_body {
             background-color: rgb(135, 48, 175);/* 更改背景颜色 */
             color: white; /* 更改字体颜色 */
@@ -136,18 +137,18 @@
                     <div class="collapse navbar-collapse justify-content-between">
                         <div class="header-left">
                             <div class="search_bar dropdown">
-                                <span class="search_icon p-3 c-pointer" data-toggle="dropdown">
+                                <!-- <span class="search_icon p-3 c-pointer" data-toggle="dropdown">
                                     <i class="mdi mdi-magnify"></i>
-                                </span>
+                                </span> -->
                                 <div class="dropdown-menu p-0 m-0">
-                                    <form>
+                                    <!-- <form>
                                         <input class="form-control" type="search" placeholder="Search" aria-label="Search">
-                                    </form>
+                                    </form> -->
                                 </div>
                             </div>
                         </div>
 
-                        <ul class="navbar-nav header-right">
+                        <!-- <ul class="navbar-nav header-right">
                             <li class="nav-item dropdown notification_dropdown">
                                 <a class="nav-link" href="#" role="button" data-toggle="dropdown">
                                     <i class="mdi mdi-bell"></i>
@@ -219,7 +220,7 @@
                                     </a>
                                 </div>
                             </li>
-                        </ul>
+                        </ul> -->
                     </div>
                 </nav>
             </div>
@@ -238,31 +239,15 @@
                     <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i
                                 class="icon icon-single-04"></i><span class="nav-text">使用</span></a>
                         <ul aria-expanded="false">
-                            <li><a href="./index.html">站点地图</a></li>
-                            <li><a href="./index2.html">路线规划</a></li>
+                            <li><a href="http://127.0.0.1:8000/admin" target="_blank">Admin</a></li>
                         </ul>
                     </li>
                     <li class="nav-label">人力</li>
                     <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i
                                 class="icon icon-app-store"></i><span class="nav-text">部门</span></a>
                         <ul aria-expanded="false">
-                            <li><a href="./app-profile.html">所有部门</a></li>
-                            <li><a class="has-arrow" href="javascript:void()" aria-expanded="false">Email</a>
-                                <ul aria-expanded="false">
-                                    <li><a href="./email-compose.html">Compose</a></li>
-                                    <li><a href="./email-inbox.html">Inbox</a></li>
-                                    <li><a href="./email-read.html">Read</a></li>
-                                </ul>
-                            </li>
-                            <li><a href="./app-calender.html">Calendar</a></li>
-                        </ul>
-                    </li>
-                    <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i
-                                class="icon icon-chart-bar-33"></i><span class="nav-text">员工</span></a>
-                        <ul aria-expanded="false">
-                            <li><a href="./chart-flot.html">所有员工</a></li>
-                            <li><a href="./chart-morris.html">添加员工</a></li>
-                            <li><a href="./chart-morris.html">管理员工</a></li>
+                            <li><a href="http://127.0.0.1:8000/catalog/departments/"target="_blank">所有部门</a></li>
+                            <li><a href="http://127.0.0.1:8000/catalog/department/employee/add"target="_blank">添加员工</a></li>
                         </ul>
                     </li>
                     <li class="nav-label">公交</li>
@@ -283,13 +268,8 @@
                         </ul>
                     </li>
 
-                    <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i
-                        class="icon icon-user"></i><span class="nav-text">车辆</span></a>
-                <ul aria-expanded="false">
-                    <li><a href="./uc-select2.html">查看车辆</a></li>
-                    <li><a href="./uc-nestable.html">添加车辆</a></li>
-                    <li><a href="./form-element.html">管理车辆</a></li>
-                </ul>
+                    <li><a  href="./vehicle.html"><i
+                        class="icon icon-user"></i>车辆</a>
                     </li>
 
                     
@@ -320,7 +300,7 @@
         </div>
         <!--**********************************
             Sidebar end
-        ***********************************-->    
+        ***********************************-->   
         <!--**********************************
             Content body start
         ***********************************-->
@@ -330,56 +310,22 @@
                 <div class="row page-titles mx-0">
                     <div class="col-sm-6 p-md-0">
                         <div class="welcome-text">
-                            <h4>管理线路</h4>
-                            <span class="ml-1">线路/站点修改</span>
+                            <h4>管理车辆</h4>
+                            <span class="ml-1">车辆添加/修改</span>
                         </div>
                     </div>
                     <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="javascript:void(0)">线路</a></li>
-                            <li class="breadcrumb-item active"><a href="javascript:void(0)">管理线路</a></li>
+                            <li class="breadcrumb-item"><a href="javascript:void(0)">车辆</a></li>
+                            <li class="breadcrumb-item active"><a href="javascript:void(0)">管理车辆</a></li>
                         </ol>
                     </div>
                 </div>
                 <!-- row -->
+                 
 
 
                 <div class="row" >
-                    <div class="col-7" style="display: none;">
-                        <div class="card" style="height: 800px;">
-                            <div class="card-header">
-                                <h4 class="card-title" id="buslineTitle" style="display: none;">线路数据表</h4>
-                                <h4 class="card-title" id="stationTitle">站点数据表</h4>
-                                <button class="btn btn-secondary badge-rounded" id="switchBtn" onclick="reload()">
-                                    刷新
-                                </button>
-                                <script>
-                                    function reload(){
-                                        location.reload();
-                                    }
-                                </script>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive" id="buslineDataTable">
-                                    <table id="example2" class="display" style="width:100%;">
-                                        <thead>
-                                            <tr>
-                                                <th>线路号</th>                       
-                                                <th>运营时间</th>
-                                                <th>票价(元)</th>
-                                                <th>状态</th>
-                                                <th>操作</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="line-table">
-                                        </tbody> 
-                                    </table>
-                                </div>
-                                <div class="table-datatable-basic" id="stationsDataTable" style="display: none;">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     <div class="col-5" style="display: none;">
                         <div class="card" style="height: 800px; overflow-y: auto;">
@@ -468,22 +414,43 @@
                                 </h4>
 
                                 <div class="bootstrap-badge">
-                                    <button type="button" class="btn btn-rounded btn-info"><span
-                                        class="btn-icon-left text-info"><i class="fa fa-plus color-info"></i>
+                                    <button type="button" 
+                                    class="btn btn-rounded btn-info"
+                                    onclick="show_add()">
+                                        <span
+                                        class="btn-icon-left text-info" ><i class="fa fa-plus color-info"></i>
                                     </span>添加车辆</button>
-                                    <button type="button" class="btn btn-rounded btn-outline-primary">所有车辆</button>
+                                    <!-- <button type="button" class="btn btn-rounded btn-outline-primary">所有车辆</button>
                                     <button type="button" class="btn btn-rounded btn-outline-warning">车辆维修</button>
                                     <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">筛选</button>
                                     <div class="dropdown-menu">
                                         <a class="dropdown-item" href="javascript:void()">按类别</a>
                                         <a class="dropdown-item" href="javascript:void()">按厂商</a>
-                                    </div>
+                                    </div> -->
                                 </div>
                         
                             </div>
                             <div class="card-body col-12" style="overflow-y: auto;">
+
+                                <div class="table-responsive" id="buslineDataTable" style="display: none;">
+                                    <table id="example2" class="display" >
+                                        <thead>
+                                            <tr>
+                                                <th>线路号</th>                       
+                                                <th>运营时间</th>
+                                                <th>票价(元)</th>
+                                                <th>状态</th>
+                                                <th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="line-table">
+                                        </tbody> 
+                                    </table>
+                                </div>
+
                                 <div class="table-responsive" >
-                                    <table class="table header-border table-hover verticle-middle">
+                                    <table id="vehicleTable"
+                                    class="table header-border table-hover verticle-middle">
                                         <thead>
                                             <tr>
                                                 <th scope="col">车牌号</th>
@@ -508,6 +475,41 @@
 
                         </div>
                     </div>
+
+                    <!-- <div class="col-8" style="display:none;" id="buslineTable">
+                        <div class="card" style="height: 800px;">
+                            <div class="card-header">
+                                <h4 class="card-title" id="buslineTitle" style="display: none;">线路数据表</h4>
+                                <h4 class="card-title" id="stationTitle">站点数据表</h4>
+                                <button class="btn btn-secondary badge-rounded" id="switchBtn" onclick="reload()">
+                                    刷新
+                                </button>
+                                <script>
+                                    function reload(){
+                                        location.reload();
+                                    }
+                                </script>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive" id="buslineDataTable">
+                                    <table id="example2" class="display" style="width:100%;">
+                                        <thead>
+                                            <tr>
+                                                <th>线路号</th>                       
+                                                <th>运营时间</th>
+                                                <th>票价(元)</th>
+                                                <th>状态</th>
+                                                <th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="line-table">
+                                        </tbody> 
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div> -->
 
                     <div class="col-6" id="vehicleDetail-div" style="display: none;">
                         <div class="card" style="height: 600px;">
@@ -534,6 +536,8 @@
                                 </div> -->
                             </div>
 
+                            
+
                             <div class="card" id="stations-div" style="background-color: #add8e6;">
                                 <div class="card-header">
                                     <h4 class="card-title" style="color: white;">沿线站点</h4>
@@ -543,7 +547,23 @@
                                         <ul class="timeline" id="stations" >
                                         </ul>
                                     </div>
+                                    <div style="display: flex;">
+                                    <button type="button" class="
+                                    btn badge-primary"
+                                    onclick="updateVehicle()"
+                                    id="saveBtn"
+                                    style="display: none;"
+                                    >保存</button></br>
+                                    <button type="button" class="
+                                    btn badge-warning"
+                                    onclick="maintain()"
+                                    id="maintainBtn"
+                                    style="display: block;"
+                                    >维修</button>
+                                    </div>
+
                                 </div>
+
                             </div>
 
 
@@ -602,18 +622,25 @@
                     </div>
 
 
-                    <div class="col-6" id="addVehicle-div" style="display: none;">
+                    <div class="col-12" id="addVehicle-div" style="display: none;">
                         <div class="card" style="height: 600px;">
                            <div class="card-header">
+                            <div class="card-title">
+                                选择车型
+                            </div>
                             <div class="bootstrap-badge">
                             <button type="button" 
                             onclick="closeAddVehicle()"
-                            class="card-title badge-light" >关闭</button>
-                            </div>    
+                            class="card-title badge-light" >取消</button>
+                            </div>  
+                              
                            </div>
-                           <div class="card-body" style="overflow-y: auto;">
+                           <div class="card-body" 
+                           style="overflow-y: auto;"
+                           id="addvehicle-body"
+                           >
 
-                            <div class="addVehicle-form">
+                            <!-- <div class="addVehicle-form">
                                 <form>
 
                                     <div class="form-row">
@@ -659,7 +686,81 @@
                                     </div>
                                     <button type="submit" class="btn btn-primary">Sign in</button>
                                 </form>
+                            </div> -->
+
+
+
+
+                           </div>
+                        </div>
+                    </div>
+
+                                        <div class="col-12" id="addVehicle-div" style="display: none;">
+                        <div class="card" style="height: 600px;">
+                           <div class="card-header">
+                            <div class="card-title">
+                                选择车型
                             </div>
+                            <div class="bootstrap-badge">
+                            <button type="button" 
+                            onclick="closeAddVehicle()"
+                            class="card-title badge-light" >取消</button>
+                            </div>  
+                              
+                           </div>
+                           <div class="card-body" 
+                           style="overflow-y: auto;"
+                           id="addvehicle-body"
+                           >
+
+                            <!-- <div class="addVehicle-form">
+                                <form>
+
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <label>First Name</label>
+                                            <input type="text" class="form-control" placeholder="1234 Main St">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label>Email</label>
+                                            <input type="email" class="form-control" placeholder="Email">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label>Password</label>
+                                            <input type="password" class="form-control" placeholder="Password">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label>City</label>
+                                            <input type="text" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-4">
+                                            <label>State</label>
+                                            <select id="inputState" class="form-control">
+                                                <option selected>Choose...</option>
+                                                <option>Option 1</option>
+                                                <option>Option 2</option>
+                                                <option>Option 3</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-2">
+                                            <label>Zip</label>
+                                            <input type="text" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox">
+                                            <label class="form-check-label">
+                                                Check me out
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Sign in</button>
+                                </form>
+                            </div> -->
+
 
 
 
@@ -669,9 +770,15 @@
 
 
 
+
+
+
+
                 </div>
             </div>
         </div>
+
+
         <!--**********************************
             Content body end
         ***********************************-->    
@@ -691,9 +798,14 @@ let getStationbyName = {};
 
 
 let getVehicles = {};
+let allVehicleModels = [];
 const div_vehicle = document.getElementById('vehicle-div');
 const div_vehicleDetail = document.getElementById('vehicleDetail-div');
+const div_addvehicle = document.getElementById('addVehicle-div');
 const SHOW = div_vehicle.style.display;
+
+let selectedLineNumber;
+let selectedBusline;
 
 window.onload = start();
 
@@ -791,6 +903,7 @@ function load_lineTable(Buslines) {
 
 
 async function manageBusline(id,lineNumber,startTime,endTime,Price,description,status){ 
+    selectedBusline = id;
     document.getElementById('lineNumber').value = lineNumber;
     document.getElementById('startTime').value = startTime;
     document.getElementById('endTime').value = endTime;
@@ -1284,6 +1397,29 @@ async function updateStationSequences(buslineId, stationData) {
 
 
 //vehicle section:
+async function fetchVehicleModels(){
+    const csrfToken = await getCsrfToken(); // 获取CSRF令牌
+    const response = await fetch('http://127.0.0.1:8000/catalog/api/vehicle/model/all', {
+        headers: {
+            'X-CSRFToken': csrfToken
+        }
+    });
+
+    if (response.ok) {
+        const vehicles = await response.json();
+        allVehicleModels = [];
+        vehicles.forEach(vehicle =>{
+         allVehicleModels.push(vehicle);
+        });
+        //await load_vehicleTable(vehicles); // 显示站点信息表格
+        //notify('车辆信息加载成功');
+    } else {
+        const errorData = await response.json();
+        //notify_error('车辆信息加载失败');
+        //Swal.fire({ icon: 'error', title: '错误!', text: errorData.detail || '获取站点信息失败。' });
+    }
+}
+
 async function fetchVehicles(){
     const csrfToken = await getCsrfToken(); // 获取CSRF令牌
     const response = await fetch('http://127.0.0.1:8000/catalog/api/vehicle/fetch/all', {
@@ -1295,6 +1431,7 @@ async function fetchVehicles(){
     if (response.ok) {
         const vehicles = await response.json();
         await load_vehicleTable(vehicles); // 显示站点信息表格
+        add_vehicle();
         notify('车辆信息加载成功');
     } else {
         const errorData = await response.json();
@@ -1303,8 +1440,83 @@ async function fetchVehicles(){
     }
 }
 
-function set_vehicleInfo(vehicle){
+async function maintain(){
+const lineNumber = selectedLineNumber;
+
+const csrfToken = await getCsrfToken();
+
+
+const response = await fetch(`http://127.0.0.1:8000/catalog/api/vehicle/update/${lineNumber}`, {
+    method: 'PUT',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken // 添加 CSRF 令牌
+    },
+    body: JSON.stringify({
+status: 'm',
+busline: null
+    })
+});
+if(response.ok){
+    await notify("更新成功");
+    location.reload();
+}else{
+    notify("添加失败，请重试");
+}
+}
+
+async function updateVehicle(){
+    const lineNumber = selectedLineNumber;
+
+    const csrfToken = await getCsrfToken();
+
+
+    const response = await fetch(`http://127.0.0.1:8000/catalog/api/vehicle/update/${lineNumber}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken // 添加 CSRF 令牌
+        },
+        body: JSON.stringify({
+    status: 'o',
+    busline: selectedBusline
+        })
+    });
+    if(response.ok){
+        await notify("添加成功");
+        location.reload();
+    }else{
+        notify("添加失败，请重试");
+    }
+}
+
+function set_vehicleInfo_single(vehicle){
     const divBody = document.getElementById('detail-info');
+    divBody.innerHTML = '';
+    const content = document.createElement('p');
+    content.className = "card-text";
+    content.innerHTML = `
+    型号: ${vehicle.vModel} </br>
+    厂商: ${vehicle.manufacturer} </br>
+    类型: ${vTypeMapping[vehicle.vType]} </br>
+    载客量: ${vehicle.capacity} </br>
+    简介: ${vehicle.description} </br>
+    <button type="button" 
+    class="btn btn-light" 
+    onclick="assignBusline('${vehicle.plateNumber}')">分配线路</button>
+                                    
+    `;
+    divBody.appendChild(content);
+}
+
+async function assignBusline(plateNumber){
+document.getElementById("vehicleTable").style.display = "none";
+    document.getElementById('buslineDataTable').style.display = SHOW;
+    document.getElementById('saveBtn').style.display = SHOW;
+}
+
+function set_vehicleInfo(vehicle,id){
+    const divBody = document.getElementById(id);
     divBody.innerHTML = '';
     const content = document.createElement('p');
     content.className = "card-text";
@@ -1318,11 +1530,100 @@ function set_vehicleInfo(vehicle){
     divBody.appendChild(content);
 }
 
+function closeAddVehicle(){
+    div_addvehicle.style.display = "none";
+    div_vehicle.className = "col-12";
+}
+
+function show_add(){
+    div_addvehicle.style.display = SHOW;
+    div_addvehicle.className = 'col-5'
+    div_vehicle.className = "col-7";
+}
+
+async function add_vehicle(){
+    await fetchVehicleModels();
+    const body = document.getElementById('addvehicle-body');
+    allVehicleModels.forEach(vehicle=>{
+        const part = document.createElement('div');
+        part.className="card text-white bg-dark";
+        part.innerHTML = `
+            <div class="card-header">
+           <h5 class="card-title text-white" id="vehicle-title">车型信息</h5>
+            </div>
+           <div class="card-body mb-0" id='V_${vehicle.id}'>
+       <!-- <p class="card-text" id="vehicle-description">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
+      <!-- <a href="javascript:void()" class="btn btn-light btn-card text-dark">Go
+                                        somewhere</a> -->
+        </div>
+       <div class="card-footer bg-transparent border-0 text-white">
+        <button type="button" 
+        class="btn btn-light btn-card text-dark"
+        onclick="createVehicle(${vehicle.id})"
+        >选择</button>
+          </div>
+        `;
+        body.appendChild(part);
+        set_vehicleInfo(vehicle,`V_${vehicle.id}`)
+    })
+    
+    
+}
+
+function generateRandomPlateNumber() {
+    const randomLetters = String.fromCharCode(
+        Math.floor(Math.random() * 26) + 65 // A-Z 的字符
+    ) + String.fromCharCode(
+        Math.floor(Math.random() * 26) + 65 // A-Z 的字符
+    );
+
+    const randomNumbers = Math.floor(10000 + Math.random() * 90000); // 生成 10000 到 99999 的随机数
+
+    return `渝${randomLetters}${randomNumbers}`;
+}
+
+function getCurrentDate() {
+    const now = new Date(); // 获取当前日期和时间
+    const year = now.getFullYear(); // 获取年份
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // 获取月份（注意：月份从0开始，需要加1）
+    const day = String(now.getDate()).padStart(2, '0'); // 获取日期
+
+    return `${year}-${month}-${day}`; // 返回格式化的日期
+}
+
+async function createVehicle(id){
+    const csrfToken = await getCsrfToken();
+
+
+    const response = await fetch('http://127.0.0.1:8000/catalog/api/vehicle/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken // 添加 CSRF 令牌
+        },
+        body: JSON.stringify({
+    plateNumber: generateRandomPlateNumber(),
+    last_maintenance_date: getCurrentDate(),
+    produce_date: getCurrentDate(),
+    status: 'm',
+    vehicle: id,
+    busline: null
+        })
+    });
+    if(response.ok){
+        await notify("添加成功");
+        location.reload();
+    }else{
+        notify("添加失败，请重试");
+    }
+}
+
 function load_vehicleTable(vehicles){
     const tableBody = document.getElementById('vehicle-table');
     tableBody.innerHTML = ''; // 清空之前的内容
 
     vehicles.forEach(vehicle => {
+        //allVehicleModels.push(vehicle.vehicle);
         let lineNumber;
         if(vehicle.busline===null) lineNumber = -1
         else lineNumber = vehicle.busline.lineNumber
@@ -1344,11 +1645,8 @@ const highlightNull = {
             <td><span class="${statusClassMapping[vehicle.status] || ''}">${statusMapping[vehicle.status] || '未知状态'}</span></td>
 
         <td>
-        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">操作</button>
-                                    <div class="dropdown-menu">
-                                        <button type="button" class="dropdown-item" onclick="vehicleDetail('${vehicle.plateNumber}',${lineNumber})">查看</button>
-                                        <button type="button" class="dropdown-item" onclick="javascript:void()">维修</button>
-                                    </div></td>
+        <button type="button" class="btn btn-secondary" onclick="vehicleDetail('${vehicle.plateNumber}',${lineNumber})">查看</button>
+                                    </td>
 
         `;
 //         <td><div class="rounded-button">
@@ -1370,6 +1668,7 @@ async function addVehicle(){
 
 //vehicle-detail:
 async function vehicleDetail(plateNumber, lineNumber){
+    selectedLineNumber = plateNumber;
     //console.log(plateNumber);
     const vehicle = getVehicles[plateNumber];
     div_vehicle.className = "col-8";
@@ -1377,7 +1676,7 @@ async function vehicleDetail(plateNumber, lineNumber){
     div_vehicleDetail.style.display = SHOW;
 
     document.getElementById('vehicle-title').textContent = plateNumber;
-    set_vehicleInfo(vehicle.vehicle);
+    set_vehicleInfo_single(vehicle.vehicle);
     
     
     //display the stations:
@@ -1388,9 +1687,10 @@ async function vehicleDetail(plateNumber, lineNumber){
     
 }
 
+
+
 function closeDetail(){
-    div_vehicle.className = "col-12";
-    div_vehicleDetail.style.display = 'none';
+    location.reload();
 }
 
 
@@ -1410,6 +1710,10 @@ function notify_error(text){
     timeout: 3000,
     progressBar: true
 }).show();
+
+
+
+ 
 }
 
     </script>
